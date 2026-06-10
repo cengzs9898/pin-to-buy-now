@@ -59,6 +59,12 @@ function Index() {
               Entegrasyonlar
             </a>
             <a
+              href="/harita"
+              className="hidden text-sm text-muted-foreground transition-colors hover:text-foreground sm:inline"
+            >
+              Canlı Harita
+            </a>
+            <a
               href="#waitlist"
               className="inline-flex h-8 items-center rounded-md bg-ink px-3 text-sm font-medium text-ink-foreground ring-1 ring-ink transition-transform hover:scale-[1.02]"
             >
