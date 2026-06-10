@@ -35,6 +35,46 @@ const INTENTS = [
 function Index() {
   const [intent, setIntent] = useState<(typeof INTENTS)[number]["id"]>("urgent");
   const [query, setQuery] = useState("");
+  const [visionState, setVisionState] = useState<"idle" | "loading" | "error">("idle");
+  const [visionError, setVisionError] = useState<string | null>(null);
+  const galleryInputRef = useRef<HTMLInputElement>(null);
+  const cameraInputRef = useRef<HTMLInputElement>(null);
+
+  const fileToDataUrl = (file: File) =>
+    new Promise<string>((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result as string);
+      reader.onerror = () => reject(reader.error);
+      reader.readAsDataURL(file);
+    });
+
+  const handleImageSelected = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (!file) return;
+    if (file.size > 8 * 1024 * 1024) {
+      setVisionState("error");
+      setVisionError("Görsel 8MB'tan büyük olamaz.");
+      return;
+    }
+    try {
+      setVisionState("loading");
+      setVisionError(null);
+      const imageDataUrl = await fileToDataUrl(file);
+      const result = await visionSearch({ data: { imageDataUrl } });
+      if (result.query) {
+        setQuery(result.query);
+        setVisionState("idle");
+      } else {
+        setVisionState("error");
+        setVisionError("Ürün tanımlanamadı, tekrar dene.");
+      }
+    } catch (err) {
+      setVisionState("error");
+      setVisionError(err instanceof Error ? err.message : "Bilinmeyen hata");
+    }
+  };
+
 
   return (
     <div className="min-h-screen bg-background font-sans text-foreground antialiased">
