@@ -1,6 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import mapPreview from "@/assets/map-preview.jpg";
+import { visionSearch } from "@/lib/api/vision-search.functions";
+
 
 export const Route = createFileRoute("/")({
   head: () => ({
