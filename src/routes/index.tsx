@@ -104,12 +104,12 @@ function Index() {
             >
               Canlı Harita
             </a>
-            <a
-              href="#waitlist"
+            <Link
+              to="/kayit-ol"
               className="inline-flex h-8 items-center rounded-md bg-ink px-3 text-sm font-medium text-ink-foreground ring-1 ring-ink transition-transform hover:scale-[1.02]"
             >
               Kayıt Ol
-            </a>
+            </Link>
           </div>
         </div>
       </nav>
