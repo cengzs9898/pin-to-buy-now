@@ -10,12 +10,18 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
+import { Route as KayitOlRouteImport } from './routes/kayit-ol'
 import { Route as HaritaRouteImport } from './routes/harita'
 import { Route as IndexRouteImport } from './routes/index'
 
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
   id: '/sitemap.xml',
   path: '/sitemap.xml',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const KayitOlRoute = KayitOlRouteImport.update({
+  id: '/kayit-ol',
+  path: '/kayit-ol',
   getParentRoute: () => rootRouteImport,
 } as any)
 const HaritaRoute = HaritaRouteImport.update({
@@ -32,30 +38,34 @@ const IndexRoute = IndexRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/harita': typeof HaritaRoute
+  '/kayit-ol': typeof KayitOlRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/harita': typeof HaritaRoute
+  '/kayit-ol': typeof KayitOlRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/harita': typeof HaritaRoute
+  '/kayit-ol': typeof KayitOlRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/harita' | '/sitemap.xml'
+  fullPaths: '/' | '/harita' | '/kayit-ol' | '/sitemap.xml'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/harita' | '/sitemap.xml'
-  id: '__root__' | '/' | '/harita' | '/sitemap.xml'
+  to: '/' | '/harita' | '/kayit-ol' | '/sitemap.xml'
+  id: '__root__' | '/' | '/harita' | '/kayit-ol' | '/sitemap.xml'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   HaritaRoute: typeof HaritaRoute
+  KayitOlRoute: typeof KayitOlRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
 }
 
@@ -66,6 +76,13 @@ declare module '@tanstack/react-router' {
       path: '/sitemap.xml'
       fullPath: '/sitemap.xml'
       preLoaderRoute: typeof SitemapDotxmlRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/kayit-ol': {
+      id: '/kayit-ol'
+      path: '/kayit-ol'
+      fullPath: '/kayit-ol'
+      preLoaderRoute: typeof KayitOlRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/harita': {
@@ -88,8 +105,19 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   HaritaRoute: HaritaRoute,
+  KayitOlRoute: KayitOlRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
