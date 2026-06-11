@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   MapContainer,
   TileLayer,
@@ -11,6 +11,7 @@ import {
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import pintosLogoH from "@/assets/pintos-logo.png.asset.json";
+import { visionSearch } from "@/lib/api/vision-search.functions";
 
 export const Route = createFileRoute("/harita")({
   head: () => ({
@@ -122,6 +123,46 @@ function HaritaPage() {
   const [status, setStatus] = useState<"idle" | "locating" | "ready" | "denied">("idle");
   const [filter, setFilter] = useState<Filter>("nearest");
   const [selected, setSelected] = useState<string | null>(null);
+  const [query, setQuery] = useState("");
+  const [visionState, setVisionState] = useState<"idle" | "loading" | "error">("idle");
+  const [visionError, setVisionError] = useState<string | null>(null);
+  const galleryInputRef = useRef<HTMLInputElement>(null);
+  const cameraInputRef = useRef<HTMLInputElement>(null);
+
+  const fileToDataUrl = (file: File) =>
+    new Promise<string>((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result as string);
+      reader.onerror = () => reject(reader.error);
+      reader.readAsDataURL(file);
+    });
+
+  const handleImageSelected = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (!file) return;
+    if (file.size > 8 * 1024 * 1024) {
+      setVisionState("error");
+      setVisionError("Görsel 8MB'tan büyük olamaz.");
+      return;
+    }
+    try {
+      setVisionState("loading");
+      setVisionError(null);
+      const imageDataUrl = await fileToDataUrl(file);
+      const result = await visionSearch({ data: { imageDataUrl } });
+      if (result.query) {
+        setQuery(result.query);
+        setVisionState("idle");
+      } else {
+        setVisionState("error");
+        setVisionError("Ürün tanımlanamadı, tekrar dene.");
+      }
+    } catch (err) {
+      setVisionState("error");
+      setVisionError(err instanceof Error ? err.message : "Bilinmeyen hata");
+    }
+  };
 
   useEffect(() => {
     if (!("geolocation" in navigator)) {
@@ -159,12 +200,21 @@ function HaritaPage() {
   }, [userPos]);
 
   const sorted = useMemo(() => {
-    const arr = [...sellers];
+    const q = query.trim().toLowerCase();
+    let arr = [...sellers];
+    if (q) {
+      arr = arr.filter(
+        (s) =>
+          s.product.toLowerCase().includes(q) ||
+          s.name.toLowerCase().includes(q) ||
+          s.category.toLowerCase().includes(q),
+      );
+    }
     if (filter === "nearest") arr.sort((a, b) => a.distanceM - b.distanceM);
     if (filter === "cheapest") arr.sort((a, b) => a.price - b.price);
     if (filter === "fastest") arr.sort((a, b) => a.etaMin - b.etaMin);
     return arr;
-  }, [sellers, filter]);
+  }, [sellers, filter, query]);
 
   const recenter = () => {
     if (!("geolocation" in navigator)) return;
@@ -209,6 +259,75 @@ function HaritaPage() {
         {/* Sidebar */}
         <aside className="z-10 flex min-h-0 flex-col border-r border-hairline bg-surface">
           <div className="border-b border-hairline p-4">
+            {/* Search bar */}
+            <div className="mb-3">
+              <div className="flex items-stretch gap-1.5 rounded-lg bg-background p-1.5 ring-1 ring-black/5 focus-within:ring-2 focus-within:ring-brand">
+                <input
+                  value={query}
+                  onChange={(e) => setQuery(e.target.value)}
+                  placeholder={
+                    visionState === "loading"
+                      ? "Görsel analiz ediliyor..."
+                      : "Ürün ara: kablo, süt, bez..."
+                  }
+                  disabled={visionState === "loading"}
+                  className="flex-1 bg-transparent px-2 py-1 text-sm outline-none placeholder:text-muted-foreground disabled:opacity-50"
+                />
+                {query && visionState !== "loading" && (
+                  <button
+                    onClick={() => setQuery("")}
+                    aria-label="Temizle"
+                    className="grid size-7 place-items-center rounded-md text-muted-foreground hover:bg-secondary hover:text-foreground"
+                  >
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+                      <path d="M18 6 6 18M6 6l12 12" />
+                    </svg>
+                  </button>
+                )}
+                <button
+                  onClick={() => galleryInputRef.current?.click()}
+                  disabled={visionState === "loading"}
+                  aria-label="Görsel yükle"
+                  className="grid size-7 place-items-center rounded-md text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground disabled:opacity-50"
+                >
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <rect x="3" y="3" width="18" height="18" rx="2" />
+                    <circle cx="9" cy="9" r="2" />
+                    <path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21" />
+                  </svg>
+                </button>
+                <button
+                  onClick={() => cameraInputRef.current?.click()}
+                  disabled={visionState === "loading"}
+                  aria-label="Fotoğraf çek"
+                  className="grid size-7 place-items-center rounded-md bg-brand text-brand-foreground transition-transform hover:brightness-105 active:scale-95 disabled:opacity-50"
+                >
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3Z" />
+                    <circle cx="12" cy="13" r="3" />
+                  </svg>
+                </button>
+              </div>
+              <input
+                ref={galleryInputRef}
+                type="file"
+                accept="image/*"
+                onChange={handleImageSelected}
+                className="hidden"
+              />
+              <input
+                ref={cameraInputRef}
+                type="file"
+                accept="image/*"
+                capture="environment"
+                onChange={handleImageSelected}
+                className="hidden"
+              />
+              {visionState === "error" && visionError && (
+                <p className="mt-2 font-mono text-[10px] text-destructive">{visionError}</p>
+              )}
+            </div>
+
             <div className="mb-3 flex gap-1 rounded-lg bg-background p-1 ring-1 ring-black/5">
               {FILTERS.map((f) => (
                 <button
@@ -225,9 +344,10 @@ function HaritaPage() {
               ))}
             </div>
             <p className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
-              {sorted.length} satıcı · canlı
+              {sorted.length} satıcı · canlı{query ? ` · "${query}"` : ""}
             </p>
           </div>
+
 
           <ul className="flex-1 divide-y divide-hairline overflow-y-auto">
             {sorted.map((s, idx) => {
