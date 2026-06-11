@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   MapContainer,
   TileLayer,
@@ -11,6 +11,7 @@ import {
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import pintosLogoH from "@/assets/pintos-logo.png.asset.json";
+import { visionSearch } from "@/lib/api/vision-search.functions";
 
 export const Route = createFileRoute("/harita")({
   head: () => ({
@@ -122,6 +123,46 @@ function HaritaPage() {
   const [status, setStatus] = useState<"idle" | "locating" | "ready" | "denied">("idle");
   const [filter, setFilter] = useState<Filter>("nearest");
   const [selected, setSelected] = useState<string | null>(null);
+  const [query, setQuery] = useState("");
+  const [visionState, setVisionState] = useState<"idle" | "loading" | "error">("idle");
+  const [visionError, setVisionError] = useState<string | null>(null);
+  const galleryInputRef = useRef<HTMLInputElement>(null);
+  const cameraInputRef = useRef<HTMLInputElement>(null);
+
+  const fileToDataUrl = (file: File) =>
+    new Promise<string>((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result as string);
+      reader.onerror = () => reject(reader.error);
+      reader.readAsDataURL(file);
+    });
+
+  const handleImageSelected = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (!file) return;
+    if (file.size > 8 * 1024 * 1024) {
+      setVisionState("error");
+      setVisionError("Görsel 8MB'tan büyük olamaz.");
+      return;
+    }
+    try {
+      setVisionState("loading");
+      setVisionError(null);
+      const imageDataUrl = await fileToDataUrl(file);
+      const result = await visionSearch({ data: { imageDataUrl } });
+      if (result.query) {
+        setQuery(result.query);
+        setVisionState("idle");
+      } else {
+        setVisionState("error");
+        setVisionError("Ürün tanımlanamadı, tekrar dene.");
+      }
+    } catch (err) {
+      setVisionState("error");
+      setVisionError(err instanceof Error ? err.message : "Bilinmeyen hata");
+    }
+  };
 
   useEffect(() => {
     if (!("geolocation" in navigator)) {
@@ -159,12 +200,21 @@ function HaritaPage() {
   }, [userPos]);
 
   const sorted = useMemo(() => {
-    const arr = [...sellers];
+    const q = query.trim().toLowerCase();
+    let arr = [...sellers];
+    if (q) {
+      arr = arr.filter(
+        (s) =>
+          s.product.toLowerCase().includes(q) ||
+          s.name.toLowerCase().includes(q) ||
+          s.category.toLowerCase().includes(q),
+      );
+    }
     if (filter === "nearest") arr.sort((a, b) => a.distanceM - b.distanceM);
     if (filter === "cheapest") arr.sort((a, b) => a.price - b.price);
     if (filter === "fastest") arr.sort((a, b) => a.etaMin - b.etaMin);
     return arr;
-  }, [sellers, filter]);
+  }, [sellers, filter, query]);
 
   const recenter = () => {
     if (!("geolocation" in navigator)) return;
