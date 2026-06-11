@@ -10,6 +10,7 @@ import {
 } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
+import pintosLogoH from "@/assets/pintos-logo.png.asset.json";
 
 export const Route = createFileRoute("/harita")({
   head: () => ({
