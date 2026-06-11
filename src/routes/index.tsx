@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useRef, useState } from "react";
 import mapPreview from "@/assets/map-preview.jpg";
+import pintosLogo from "@/assets/pintos-logo.png.asset.json";
 import { visionSearch } from "@/lib/api/vision-search.functions";
 
 
@@ -81,11 +82,8 @@ function Index() {
       {/* Header */}
       <nav className="sticky top-0 z-50 border-b border-hairline bg-background/80 backdrop-blur-md">
         <div className="mx-auto flex h-14 max-w-screen-xl items-center justify-between px-6">
-          <a href="/" className="flex items-center gap-2">
-            <div className="grid size-6 place-items-center rounded bg-brand">
-              <div className="size-1.5 rounded-full bg-ink" />
-            </div>
-            <span className="text-sm font-semibold tracking-tight">Pintos</span>
+          <a href="/" className="flex items-center gap-2" aria-label="Pintos">
+            <img src={pintosLogo.url} alt="Pintos" className="h-8 w-auto" />
           </a>
           <div className="flex items-center gap-6">
             <a
