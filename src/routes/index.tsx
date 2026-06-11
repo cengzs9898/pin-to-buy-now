@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useRef, useState } from "react";
 import mapPreview from "@/assets/map-preview.jpg";
 import pintosLogo from "@/assets/pintos-logo.png.asset.json";
