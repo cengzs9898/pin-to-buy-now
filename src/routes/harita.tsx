@@ -10,6 +10,7 @@ import {
 } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
+import pintosLogoH from "@/assets/pintos-logo.png.asset.json";
 
 export const Route = createFileRoute("/harita")({
   head: () => ({
@@ -184,11 +185,9 @@ function HaritaPage() {
     <div className="flex h-screen flex-col bg-background font-sans text-foreground">
       {/* Header */}
       <header className="z-20 flex items-center justify-between border-b border-hairline bg-background/90 px-6 py-3 backdrop-blur">
-        <a href="/" className="flex items-center gap-2">
-          <div className="grid size-6 place-items-center rounded bg-brand">
-            <div className="size-1.5 rounded-full bg-ink" />
-          </div>
-          <span className="text-sm font-semibold tracking-tight">Pintos · Harita</span>
+        <a href="/" className="flex items-center gap-2" aria-label="Pintos">
+          <img src={pintosLogoH.url} alt="Pintos" className="h-7 w-auto" />
+          <span className="text-xs font-semibold tracking-tight text-muted-foreground">· Harita</span>
         </a>
         <div className="flex items-center gap-2">
           <span className="hidden font-mono text-[10px] uppercase tracking-widest text-muted-foreground sm:inline">
