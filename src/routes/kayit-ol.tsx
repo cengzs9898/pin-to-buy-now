@@ -313,7 +313,7 @@ function KayitOl() {
           {/* Login link */}
           <p className="mt-6 text-center text-sm text-muted-foreground">
             Zaten hesabın var mı?{" "}
-            <Link to="/" className="font-medium text-foreground underline underline-offset-2">
+            <Link to="/giris" className="font-medium text-foreground underline underline-offset-2">
               Giriş yap
             </Link>
           </p>
