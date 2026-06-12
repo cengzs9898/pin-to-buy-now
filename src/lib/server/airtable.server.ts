@@ -27,7 +27,7 @@ function headers() {
   };
 }
 
-export type AirtableRecord<T = Record<string, unknown>> = {
+export type AirtableRecord<T extends AirtableFields = AirtableFields> = {
   id: string;
   createdTime: string;
   fields: T;
@@ -42,7 +42,7 @@ async function gw<T>(path: string, init?: RequestInit): Promise<T> {
   return res.json() as Promise<T>;
 }
 
-export async function listRecords<T = Record<string, unknown>>(
+export async function listRecords<T extends AirtableFields = AirtableFields>(
   table: string,
   opts: { filterByFormula?: string; maxRecords?: number; pageSize?: number; offset?: string; fields?: string[]; sort?: { field: string; direction?: "asc" | "desc" }[] } = {},
 ): Promise<{ records: AirtableRecord<T>[]; offset?: string }> {
@@ -60,7 +60,7 @@ export async function listRecords<T = Record<string, unknown>>(
   return gw(`/${encodeURIComponent(table)}${qs ? `?${qs}` : ""}`);
 }
 
-export async function findOne<T = Record<string, unknown>>(table: string, formula: string) {
+export async function findOne<T extends AirtableFields = AirtableFields>(table: string, formula: string) {
   const { records } = await listRecords<T>(table, { filterByFormula: formula, maxRecords: 1 });
   return records[0] ?? null;
 }
@@ -77,7 +77,7 @@ export async function countRecords(table: string, formula: string): Promise<numb
   return count;
 }
 
-export async function createRecord<T = Record<string, unknown>>(table: string, fields: Record<string, unknown>) {
+export async function createRecord<T extends AirtableFields = AirtableFields>(table: string, fields: AirtableFields) {
   const out = await gw<{ records: AirtableRecord<T>[] }>(`/${encodeURIComponent(table)}`, {
     method: "POST",
     body: JSON.stringify({ records: [{ fields }], typecast: true }),
@@ -85,7 +85,7 @@ export async function createRecord<T = Record<string, unknown>>(table: string, f
   return out.records[0];
 }
 
-export async function updateRecord<T = Record<string, unknown>>(table: string, id: string, fields: Record<string, unknown>) {
+export async function updateRecord<T extends AirtableFields = AirtableFields>(table: string, id: string, fields: AirtableFields) {
   const out = await gw<{ records: AirtableRecord<T>[] }>(`/${encodeURIComponent(table)}`, {
     method: "PATCH",
     body: JSON.stringify({ records: [{ id, fields }], typecast: true }),
