@@ -38,7 +38,9 @@ export const registerAccount = createServerFn({ method: "POST" })
     const passwordHash = await bcrypt.hash(data.password, 10);
     const nowIso = new Date().toISOString();
 
-    const fields: Record<string, unknown> =
+    const { TABLES, createRecord: createRec } = await import("@/lib/server/airtable.server");
+    type Fields = import("@/lib/server/airtable.server").AirtableFields;
+    const fields: Fields =
       data.role === "seller"
         ? {
             email,
@@ -55,7 +57,7 @@ export const registerAccount = createServerFn({ method: "POST" })
             created_at: nowIso,
           };
 
-    const rec = await createRecord(table, fields);
+    const rec = await createRec(table, fields);
     await issueSession({
       sub: rec.id,
       email,
