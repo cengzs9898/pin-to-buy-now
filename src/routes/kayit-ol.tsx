@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import pintosLogo from "@/assets/pintos-logo.png.asset.json";
-import { registerUser } from "@/lib/api/auth.functions";
+import { registerAccount } from "@/lib/api/airtable-auth.functions";
 
 export const Route = createFileRoute("/kayit-ol")({
   head: () => ({
@@ -72,7 +72,7 @@ function KayitOl() {
 
     setStatus("loading");
     try {
-      const result = await registerUser({
+      const result = await registerAccount({
         data: {
           email,
           password,
@@ -83,7 +83,7 @@ function KayitOl() {
       });
       if (result.success) {
         setStatus("success");
-        setStatusMsg(result.message);
+        setStatusMsg("Hesap oluşturuldu, giriş yapıldı.");
         resetForm();
       } else {
         setStatus("error");
@@ -313,7 +313,7 @@ function KayitOl() {
           {/* Login link */}
           <p className="mt-6 text-center text-sm text-muted-foreground">
             Zaten hesabın var mı?{" "}
-            <Link to="/" className="font-medium text-foreground underline underline-offset-2">
+            <Link to="/giris" className="font-medium text-foreground underline underline-offset-2">
               Giriş yap
             </Link>
           </p>
