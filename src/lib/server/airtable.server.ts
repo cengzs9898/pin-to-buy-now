@@ -12,6 +12,9 @@ export const TABLES = {
 export const PRODUCT_LIMIT_PER_SELLER = 1000;
 export const FAVORITE_LIMIT_PER_USER = 1000;
 
+export type JsonValue = string | number | boolean | null | JsonValue[] | { [k: string]: JsonValue };
+export type AirtableFields = Record<string, JsonValue>;
+
 function headers() {
   const lovableKey = process.env.LOVABLE_API_KEY;
   const airtableKey = process.env.AIRTABLE_API_KEY;
