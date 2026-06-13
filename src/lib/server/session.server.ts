@@ -27,7 +27,7 @@ export async function issueSession(payload: SessionPayload) {
   setCookie(COOKIE_NAME, token, {
     httpOnly: true,
     secure: true,
-    sameSite: "lax",
+    sameSite: "none",
     path: "/",
     maxAge: MAX_AGE_SEC,
   });
