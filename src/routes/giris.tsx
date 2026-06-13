@@ -29,7 +29,7 @@ function Giris() {
     setMsg("");
     try {
       await loginAccount({ data: { email, password, role: tab } });
-      navigate({ to: tab === "seller" ? "/harita" : "/" });
+      navigate({ to: tab === "seller" ? "/satici/profil" : "/" });
     } catch (err) {
       setStatus("error");
       setMsg(err instanceof Error ? err.message : "Giriş başarısız.");

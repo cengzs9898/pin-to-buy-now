@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import pintosLogo from "@/assets/pintos-logo.png.asset.json";
 import { registerAccount } from "@/lib/api/airtable-auth.functions";
@@ -20,6 +20,7 @@ export const Route = createFileRoute("/kayit-ol")({
 type Tab = "user" | "seller";
 
 function KayitOl() {
+  const navigate = useNavigate();
   const [tab, setTab] = useState<Tab>("user");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -85,6 +86,9 @@ function KayitOl() {
         setStatus("success");
         setStatusMsg("Hesap oluşturuldu, giriş yapıldı.");
         resetForm();
+        if (tab === "seller") {
+          setTimeout(() => navigate({ to: "/satici/profil" }), 600);
+        }
       } else {
         setStatus("error");
         setStatusMsg("Bir hata oluştu, tekrar dene.");
