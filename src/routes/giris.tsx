@@ -6,18 +6,15 @@ import { loginAccount } from "@/lib/api/airtable-auth.functions";
 export const Route = createFileRoute("/giris")({
   head: () => ({
     meta: [
-      { title: "Giriş Yap — Pintos" },
-      { name: "description", content: "Pintos hesabına giriş yap. Kullanıcı veya satıcı olarak hesabına eriş." },
+      { title: "Satıcı Girişi — Pintos" },
+      { name: "description", content: "Pintos satıcı hesabına giriş yap." },
     ],
   }),
   component: Giris,
 });
 
-type Tab = "user" | "seller";
-
 function Giris() {
   const navigate = useNavigate();
-  const [tab, setTab] = useState<Tab>("user");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [status, setStatus] = useState<"idle" | "loading" | "error">("idle");
@@ -28,8 +25,8 @@ function Giris() {
     setStatus("loading");
     setMsg("");
     try {
-      await loginAccount({ data: { email, password, role: tab } });
-      navigate({ to: tab === "seller" ? "/satici/profil" : "/" });
+      await loginAccount({ data: { email, password, role: "seller" } });
+      navigate({ to: "/satici/profil" });
     } catch (err) {
       setStatus("error");
       setMsg(err instanceof Error ? err.message : "Giriş başarısız.");
@@ -53,33 +50,10 @@ function Giris() {
         <div className="w-full max-w-md">
           <div className="mb-8 text-center">
             <img src={pintosLogo.url} alt="Pintos" className="mx-auto mb-4 h-10 w-auto" />
-            <h1 className="text-2xl font-semibold tracking-tight">Giriş Yap</h1>
-            <p className="mt-1 text-sm text-muted-foreground">Hesabına giriş yap, kaldığın yerden devam et.</p>
-          </div>
-
-          <div className="mb-6 grid grid-cols-2 gap-2 rounded-xl bg-surface p-1 ring-1 ring-black/5">
-            <button
-              type="button"
-              onClick={() => setTab("user")}
-              className={
-                tab === "user"
-                  ? "rounded-lg bg-surface-2 py-2.5 text-sm font-medium text-foreground shadow-sm"
-                  : "rounded-lg py-2.5 text-sm font-medium text-muted-foreground hover:text-foreground"
-              }
-            >
-              Kullanıcı
-            </button>
-            <button
-              type="button"
-              onClick={() => setTab("seller")}
-              className={
-                tab === "seller"
-                  ? "rounded-lg bg-surface-2 py-2.5 text-sm font-medium text-foreground shadow-sm"
-                  : "rounded-lg py-2.5 text-sm font-medium text-muted-foreground hover:text-foreground"
-              }
-            >
-              Satıcı
-            </button>
+            <h1 className="text-2xl font-semibold tracking-tight">Satıcı Girişi</h1>
+            <p className="mt-1 text-sm text-muted-foreground">
+              Sadece satıcılar için. Alıcı olarak gezmek için kayıt gerekmez.
+            </p>
           </div>
 
           <form
@@ -119,10 +93,17 @@ function Giris() {
           </form>
 
           <p className="mt-6 text-center text-sm text-muted-foreground">
-            Hesabın yok mu?{" "}
+            Satıcı hesabın yok mu?{" "}
             <Link to="/kayit-ol" className="font-medium text-foreground underline underline-offset-2">
-              Kayıt ol
+              Satıcı kaydı oluştur
             </Link>
+          </p>
+          <p className="mt-2 text-center text-xs text-muted-foreground">
+            Alıcıysan{" "}
+            <Link to="/" className="font-medium text-foreground underline underline-offset-2">
+              ana sayfadan
+            </Link>{" "}
+            doğrudan keşfedebilirsin.
           </p>
         </div>
       </main>
