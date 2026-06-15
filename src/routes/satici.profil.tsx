@@ -2,6 +2,7 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import pintosLogo from "@/assets/pintos-logo.png.asset.json";
 import { getMyProfile, updateMyProfile } from "@/lib/api/seller-profile.functions";
+import { getAuthToken, clearAuthToken } from "@/lib/auth-token";
 
 export const Route = createFileRoute("/satici/profil")({
   head: () => ({
