@@ -26,7 +26,8 @@ function Giris() {
     setStatus("loading");
     setMsg("");
     try {
-      await loginAccount({ data: { email, password, role: "seller" } });
+      const res = await loginAccount({ data: { email, password, role: "seller" } });
+      if (res?.token) setAuthToken(res.token);
       navigate({ to: "/satici/profil" });
     } catch (err) {
       setStatus("error");
