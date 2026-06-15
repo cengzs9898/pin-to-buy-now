@@ -2,6 +2,7 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import pintosLogo from "@/assets/pintos-logo.png.asset.json";
 import { loginAccount } from "@/lib/api/airtable-auth.functions";
+import { setAuthToken } from "@/lib/auth-token";
 
 export const Route = createFileRoute("/giris")({
   head: () => ({
