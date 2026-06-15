@@ -57,13 +57,13 @@ export const registerAccount = createServerFn({ method: "POST" })
           };
 
     const rec = await createRecord(table, fields);
-    await issueSession({
+    const token = await issueSession({
       sub: rec.id,
       email,
       role: data.role,
       name: data.role === "seller" ? data.businessName! : data.fullName,
     });
-    return { success: true, role: data.role, email };
+    return { success: true, role: data.role, email, token };
   });
 
 export const loginAccount = createServerFn({ method: "POST" })
