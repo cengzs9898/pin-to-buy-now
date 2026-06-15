@@ -74,6 +74,13 @@ export async function readSession(): Promise<SessionPayload | null> {
   }
 }
 
+export async function resolveSession(token?: string | null): Promise<SessionPayload | null> {
+  const cookieSession = await readSession();
+  if (cookieSession) return cookieSession;
+  if (token) return await verifyToken(token);
+  return null;
+}
+
 export function clearSession() {
   deleteCookie(COOKIE_NAME, { path: "/" });
 }
