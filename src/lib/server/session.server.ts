@@ -18,12 +18,16 @@ export type SessionPayload = {
   name: string;
 };
 
-export async function issueSession(payload: SessionPayload) {
-  const token = await new SignJWT(payload as unknown as Record<string, unknown>)
+export async function signToken(payload: SessionPayload): Promise<string> {
+  return await new SignJWT(payload as unknown as Record<string, unknown>)
     .setProtectedHeader({ alg: "HS256" })
     .setIssuedAt()
     .setExpirationTime(`${MAX_AGE_SEC}s`)
     .sign(secretKey());
+}
+
+export async function issueSession(payload: SessionPayload): Promise<string> {
+  const token = await signToken(payload);
   setCookie(COOKIE_NAME, token, {
     httpOnly: true,
     secure: true,
@@ -32,6 +36,23 @@ export async function issueSession(payload: SessionPayload) {
     maxAge: MAX_AGE_SEC,
   });
   console.log("[session] issued", { email: payload.email, role: payload.role, len: token.length });
+  return token;
+}
+
+export async function verifyToken(token: string): Promise<SessionPayload | null> {
+  try {
+    const { payload } = await jwtVerify(token, secretKey());
+    if (typeof payload.sub !== "string" || typeof (payload as any).email !== "string") return null;
+    return {
+      sub: payload.sub,
+      email: (payload as any).email,
+      role: (payload as any).role,
+      name: (payload as any).name,
+    };
+  } catch (e) {
+    console.log("[session] verify fail", e instanceof Error ? e.message : String(e));
+    return null;
+  }
 }
 
 export async function readSession(): Promise<SessionPayload | null> {
