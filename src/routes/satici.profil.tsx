@@ -49,7 +49,8 @@ function SaticiProfil() {
   useEffect(() => {
     (async () => {
       try {
-        const res = await getMyProfile();
+        const token = getAuthToken();
+        const res = await getMyProfile({ data: { token } });
         const f = res.fields as Record<string, unknown>;
         setEmail((f.email as string) ?? "");
         setVerified(Boolean(f.is_verified));
@@ -69,6 +70,7 @@ function SaticiProfil() {
         setStatus("error");
         setMsg(err instanceof Error ? err.message : "Profil yüklenemedi.");
         if (err instanceof Error && /satıcılar/i.test(err.message)) {
+          clearAuthToken();
           navigate({ to: "/giris" });
         }
       }
