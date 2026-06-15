@@ -31,10 +31,12 @@ export async function issueSession(payload: SessionPayload) {
     path: "/",
     maxAge: MAX_AGE_SEC,
   });
+  console.log("[session] issued", { email: payload.email, role: payload.role, len: token.length });
 }
 
 export async function readSession(): Promise<SessionPayload | null> {
   const token = getCookie(COOKIE_NAME);
+  console.log("[session] read", { has: !!token, len: token?.length ?? 0 });
   if (!token) return null;
   try {
     const { payload } = await jwtVerify(token, secretKey());
@@ -45,7 +47,8 @@ export async function readSession(): Promise<SessionPayload | null> {
       role: (payload as any).role,
       name: (payload as any).name,
     };
-  } catch {
+  } catch (e) {
+    console.log("[session] verify fail", e instanceof Error ? e.message : String(e));
     return null;
   }
 }
