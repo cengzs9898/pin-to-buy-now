@@ -2,6 +2,7 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import pintosLogo from "@/assets/pintos-logo.png.asset.json";
 import { registerAccount } from "@/lib/api/airtable-auth.functions";
+import { setAuthToken } from "@/lib/auth-token";
 
 export const Route = createFileRoute("/kayit-ol")({
   head: () => ({
@@ -59,6 +60,7 @@ function KayitOl() {
         data: { email, password, fullName, role: "seller", businessName },
       });
       if (result.success) {
+        if (result.token) setAuthToken(result.token);
         setStatus("success");
         setStatusMsg("Hesap oluşturuldu, giriş yapıldı.");
         setTimeout(() => navigate({ to: "/satici/profil" }), 500);

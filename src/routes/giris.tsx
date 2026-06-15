@@ -2,6 +2,7 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import pintosLogo from "@/assets/pintos-logo.png.asset.json";
 import { loginAccount } from "@/lib/api/airtable-auth.functions";
+import { setAuthToken } from "@/lib/auth-token";
 
 export const Route = createFileRoute("/giris")({
   head: () => ({
@@ -25,7 +26,8 @@ function Giris() {
     setStatus("loading");
     setMsg("");
     try {
-      await loginAccount({ data: { email, password, role: "seller" } });
+      const res = await loginAccount({ data: { email, password, role: "seller" } });
+      if (res?.token) setAuthToken(res.token);
       navigate({ to: "/satici/profil" });
     } catch (err) {
       setStatus("error");

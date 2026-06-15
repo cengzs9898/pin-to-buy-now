@@ -57,13 +57,13 @@ export const registerAccount = createServerFn({ method: "POST" })
           };
 
     const rec = await createRecord(table, fields);
-    await issueSession({
+    const token = await issueSession({
       sub: rec.id,
       email,
       role: data.role,
       name: data.role === "seller" ? data.businessName! : data.fullName,
     });
-    return { success: true, role: data.role, email };
+    return { success: true, role: data.role, email, token };
   });
 
 export const loginAccount = createServerFn({ method: "POST" })
@@ -89,8 +89,8 @@ export const loginAccount = createServerFn({ method: "POST" })
     if (!ok) throw new Error("E-posta veya şifre hatalı.");
 
     const name = data.role === "seller" ? rec.fields.business_name ?? email : rec.fields.full_name ?? email;
-    await issueSession({ sub: rec.id, email, role: data.role, name });
-    return { success: true, role: data.role, email, name };
+    const token = await issueSession({ sub: rec.id, email, role: data.role, name });
+    return { success: true, role: data.role, email, name, token };
   });
 
 export const getMe = createServerFn({ method: "GET" }).handler(async () => {

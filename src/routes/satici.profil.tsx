@@ -2,6 +2,7 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import pintosLogo from "@/assets/pintos-logo.png.asset.json";
 import { getMyProfile, updateMyProfile } from "@/lib/api/seller-profile.functions";
+import { getAuthToken, clearAuthToken } from "@/lib/auth-token";
 
 export const Route = createFileRoute("/satici/profil")({
   head: () => ({
@@ -48,7 +49,8 @@ function SaticiProfil() {
   useEffect(() => {
     (async () => {
       try {
-        const res = await getMyProfile();
+        const token = getAuthToken();
+        const res = await getMyProfile({ data: { token } });
         const f = res.fields as Record<string, unknown>;
         setEmail((f.email as string) ?? "");
         setVerified(Boolean(f.is_verified));
@@ -68,6 +70,7 @@ function SaticiProfil() {
         setStatus("error");
         setMsg(err instanceof Error ? err.message : "Profil yüklenemedi.");
         if (err instanceof Error && /satıcılar/i.test(err.message)) {
+          clearAuthToken();
           navigate({ to: "/giris" });
         }
       }
@@ -106,6 +109,7 @@ function SaticiProfil() {
           district: form.district.trim(),
           latitude: Number(form.latitude),
           longitude: Number(form.longitude),
+          token: getAuthToken(),
         },
       });
       setStatus("saved");

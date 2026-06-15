@@ -24,6 +24,7 @@ type UpdateInput = {
   district: string;
   latitude: number;
   longitude: number;
+  token?: string;
 };
 
 function requireString(v: unknown, label: string, max = 200): string {
@@ -40,18 +41,20 @@ function requireCoord(v: unknown, label: string, min: number, max: number): numb
   return n;
 }
 
-export const getMyProfile = createServerFn({ method: "GET" }).handler(async () => {
-  const { readSession } = await import("@/lib/server/session.server");
-  const { TABLES, findOne, esc } = await import("@/lib/server/airtable.server");
-  const s = await readSession();
-  if (!s || s.role !== "seller") throw new Error("Sadece satıcılar erişebilir.");
-  const rec = await findOne<Partial<SellerProfile>>(
-    TABLES.Sellers,
-    `LOWER({email}) = "${esc(s.email)}"`,
-  );
-  if (!rec) throw new Error("Satıcı kaydı bulunamadı.");
-  return { id: rec.id, fields: rec.fields };
-});
+export const getMyProfile = createServerFn({ method: "POST" })
+  .inputValidator((input: { token?: string } | undefined) => ({ token: input?.token }))
+  .handler(async ({ data }) => {
+    const { resolveSession } = await import("@/lib/server/session.server");
+    const { TABLES, findOne, esc } = await import("@/lib/server/airtable.server");
+    const s = await resolveSession(data.token);
+    if (!s || s.role !== "seller") throw new Error("Sadece satıcılar erişebilir.");
+    const rec = await findOne<Partial<SellerProfile>>(
+      TABLES.Sellers,
+      `LOWER({email}) = "${esc(s.email)}"`,
+    );
+    if (!rec) throw new Error("Satıcı kaydı bulunamadı.");
+    return { id: rec.id, fields: rec.fields };
+  });
 
 export const updateMyProfile = createServerFn({ method: "POST" })
   .inputValidator((input: UpdateInput) => {
@@ -65,15 +68,17 @@ export const updateMyProfile = createServerFn({ method: "POST" })
       district: requireString(input?.district, "İlçe", 100),
       latitude: requireCoord(input?.latitude, "Enlem", -90, 90),
       longitude: requireCoord(input?.longitude, "Boylam", -180, 180),
+      token: typeof input?.token === "string" ? input.token : undefined,
     };
   })
   .handler(async ({ data }) => {
-    const { readSession } = await import("@/lib/server/session.server");
+    const { resolveSession } = await import("@/lib/server/session.server");
     const { TABLES, findOne, updateRecord, esc } = await import("@/lib/server/airtable.server");
-    const s = await readSession();
+    const s = await resolveSession(data.token);
     if (!s || s.role !== "seller") throw new Error("Sadece satıcılar düzenleyebilir.");
     const rec = await findOne(TABLES.Sellers, `LOWER({email}) = "${esc(s.email)}"`);
     if (!rec) throw new Error("Satıcı kaydı bulunamadı.");
-    const updated = await updateRecord(TABLES.Sellers, rec.id, { ...data });
+    const { token: _t, ...fields } = data;
+    const updated = await updateRecord(TABLES.Sellers, rec.id, { ...fields });
     return { success: true, id: updated.id };
   });
