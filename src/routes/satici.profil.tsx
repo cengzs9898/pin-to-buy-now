@@ -109,6 +109,7 @@ function SaticiProfil() {
           district: form.district.trim(),
           latitude: Number(form.latitude),
           longitude: Number(form.longitude),
+          token: getAuthToken(),
         },
       });
       setStatus("saved");
