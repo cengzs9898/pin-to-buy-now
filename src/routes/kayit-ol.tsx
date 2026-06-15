@@ -60,6 +60,7 @@ function KayitOl() {
         data: { email, password, fullName, role: "seller", businessName },
       });
       if (result.success) {
+        if (result.token) setAuthToken(result.token);
         setStatus("success");
         setStatusMsg("Hesap oluşturuldu, giriş yapıldı.");
         setTimeout(() => navigate({ to: "/satici/profil" }), 500);
