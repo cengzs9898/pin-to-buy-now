@@ -14,6 +14,7 @@ import { Route as KayitOlRouteImport } from './routes/kayit-ol'
 import { Route as HaritaRouteImport } from './routes/harita'
 import { Route as GirisRouteImport } from './routes/giris'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as SaticiUrunlerRouteImport } from './routes/satici.urunler'
 import { Route as SaticiProfilRouteImport } from './routes/satici.profil'
 
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
@@ -41,6 +42,11 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const SaticiUrunlerRoute = SaticiUrunlerRouteImport.update({
+  id: '/satici/urunler',
+  path: '/satici/urunler',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SaticiProfilRoute = SaticiProfilRouteImport.update({
   id: '/satici/profil',
   path: '/satici/profil',
@@ -54,6 +60,7 @@ export interface FileRoutesByFullPath {
   '/kayit-ol': typeof KayitOlRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/satici/profil': typeof SaticiProfilRoute
+  '/satici/urunler': typeof SaticiUrunlerRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -62,6 +69,7 @@ export interface FileRoutesByTo {
   '/kayit-ol': typeof KayitOlRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/satici/profil': typeof SaticiProfilRoute
+  '/satici/urunler': typeof SaticiUrunlerRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -71,6 +79,7 @@ export interface FileRoutesById {
   '/kayit-ol': typeof KayitOlRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/satici/profil': typeof SaticiProfilRoute
+  '/satici/urunler': typeof SaticiUrunlerRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -81,6 +90,7 @@ export interface FileRouteTypes {
     | '/kayit-ol'
     | '/sitemap.xml'
     | '/satici/profil'
+    | '/satici/urunler'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -89,6 +99,7 @@ export interface FileRouteTypes {
     | '/kayit-ol'
     | '/sitemap.xml'
     | '/satici/profil'
+    | '/satici/urunler'
   id:
     | '__root__'
     | '/'
@@ -97,6 +108,7 @@ export interface FileRouteTypes {
     | '/kayit-ol'
     | '/sitemap.xml'
     | '/satici/profil'
+    | '/satici/urunler'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -106,6 +118,7 @@ export interface RootRouteChildren {
   KayitOlRoute: typeof KayitOlRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   SaticiProfilRoute: typeof SaticiProfilRoute
+  SaticiUrunlerRoute: typeof SaticiUrunlerRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -145,6 +158,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/satici/urunler': {
+      id: '/satici/urunler'
+      path: '/satici/urunler'
+      fullPath: '/satici/urunler'
+      preLoaderRoute: typeof SaticiUrunlerRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/satici/profil': {
       id: '/satici/profil'
       path: '/satici/profil'
@@ -162,6 +182,7 @@ const rootRouteChildren: RootRouteChildren = {
   KayitOlRoute: KayitOlRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   SaticiProfilRoute: SaticiProfilRoute,
+  SaticiUrunlerRoute: SaticiUrunlerRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
