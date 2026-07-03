@@ -28,6 +28,9 @@ function SaticiUrunler() {
   const [msg, setMsg] = useState("");
   const [form, setForm] = useState({ name: "", price: "", image_url: "" });
   const [saving, setSaving] = useState(false);
+  const [analyzing, setAnalyzing] = useState(false);
+  const fileRef = useRef<HTMLInputElement>(null);
+  const cameraRef = useRef<HTMLInputElement>(null);
 
   const load = async () => {
     try {
