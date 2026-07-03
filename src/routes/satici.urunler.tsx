@@ -1,7 +1,12 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import pintosLogo from "@/assets/pintos-logo.png.asset.json";
-import { listMyProducts, createProduct, deleteProduct } from "@/lib/api/products.functions";
+import {
+  listMyProducts,
+  createProduct,
+  deleteProduct,
+  analyzeAndCreateProduct,
+} from "@/lib/api/products.functions";
 import { getAuthToken, clearAuthToken } from "@/lib/auth-token";
 
 export const Route = createFileRoute("/satici/urunler")({
@@ -23,6 +28,9 @@ function SaticiUrunler() {
   const [msg, setMsg] = useState("");
   const [form, setForm] = useState({ name: "", price: "", image_url: "" });
   const [saving, setSaving] = useState(false);
+  const [analyzing, setAnalyzing] = useState(false);
+  const fileRef = useRef<HTMLInputElement>(null);
+  const cameraRef = useRef<HTMLInputElement>(null);
 
   const load = async () => {
     try {
@@ -78,6 +86,51 @@ function SaticiUrunler() {
     }
   };
 
+  // Downscale + convert to JPEG data URL to keep payload small
+  const fileToDataUrl = (file: File): Promise<string> =>
+    new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onerror = () => reject(reader.error);
+      reader.onload = () => {
+        const img = new Image();
+        img.onerror = () => reject(new Error("Görsel okunamadı."));
+        img.onload = () => {
+          const MAX = 1024;
+          const scale = Math.min(1, MAX / Math.max(img.width, img.height));
+          const w = Math.round(img.width * scale);
+          const h = Math.round(img.height * scale);
+          const canvas = document.createElement("canvas");
+          canvas.width = w;
+          canvas.height = h;
+          const ctx = canvas.getContext("2d");
+          if (!ctx) return reject(new Error("Canvas hatası."));
+          ctx.drawImage(img, 0, 0, w, h);
+          resolve(canvas.toDataURL("image/jpeg", 0.85));
+        };
+        img.src = reader.result as string;
+      };
+      reader.readAsDataURL(file);
+    });
+
+  const onPickImage = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (!file) return;
+    setAnalyzing(true);
+    setMsg("");
+    try {
+      const dataUrl = await fileToDataUrl(file);
+      await analyzeAndCreateProduct({
+        data: { image_data_url: dataUrl, token: getAuthToken() },
+      });
+      await load();
+    } catch (err) {
+      setMsg(err instanceof Error ? err.message : "Analiz başarısız.");
+    } finally {
+      setAnalyzing(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-background font-sans text-foreground antialiased">
       <nav className="sticky top-0 z-50 border-b border-hairline bg-background/80 backdrop-blur-md">
@@ -101,6 +154,44 @@ function SaticiUrunler() {
           <h1 className="text-2xl font-semibold tracking-tight">Ürünlerim</h1>
           <p className="mt-1 text-sm text-muted-foreground">Satır satır ürün ekle, listele ve sil.</p>
         </header>
+
+        <div className="mb-4 flex flex-wrap items-center gap-2 rounded-lg border border-dashed border-hairline bg-surface p-3">
+          <span className="mr-1 text-sm font-medium">Fotoğrafla otomatik ekle:</span>
+          <input
+            ref={cameraRef}
+            type="file"
+            accept="image/*"
+            capture="environment"
+            hidden
+            onChange={onPickImage}
+          />
+          <input
+            ref={fileRef}
+            type="file"
+            accept="image/*"
+            hidden
+            onChange={onPickImage}
+          />
+          <button
+            type="button"
+            disabled={analyzing}
+            onClick={() => cameraRef.current?.click()}
+            className="rounded bg-ink px-3 py-2 text-sm font-medium text-ink-foreground disabled:opacity-60"
+          >
+            📷 Fotoğraf çek
+          </button>
+          <button
+            type="button"
+            disabled={analyzing}
+            onClick={() => fileRef.current?.click()}
+            className="rounded border border-input bg-surface-2 px-3 py-2 text-sm font-medium disabled:opacity-60"
+          >
+            🖼️ Görsel yükle
+          </button>
+          {analyzing && (
+            <span className="text-xs text-muted-foreground">Analiz ediliyor, ürün ekleniyor…</span>
+          )}
+        </div>
 
         <form
           onSubmit={onAdd}
