@@ -86,6 +86,51 @@ function SaticiUrunler() {
     }
   };
 
+  // Downscale + convert to JPEG data URL to keep payload small
+  const fileToDataUrl = (file: File): Promise<string> =>
+    new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onerror = () => reject(reader.error);
+      reader.onload = () => {
+        const img = new Image();
+        img.onerror = () => reject(new Error("Görsel okunamadı."));
+        img.onload = () => {
+          const MAX = 1024;
+          const scale = Math.min(1, MAX / Math.max(img.width, img.height));
+          const w = Math.round(img.width * scale);
+          const h = Math.round(img.height * scale);
+          const canvas = document.createElement("canvas");
+          canvas.width = w;
+          canvas.height = h;
+          const ctx = canvas.getContext("2d");
+          if (!ctx) return reject(new Error("Canvas hatası."));
+          ctx.drawImage(img, 0, 0, w, h);
+          resolve(canvas.toDataURL("image/jpeg", 0.85));
+        };
+        img.src = reader.result as string;
+      };
+      reader.readAsDataURL(file);
+    });
+
+  const onPickImage = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (!file) return;
+    setAnalyzing(true);
+    setMsg("");
+    try {
+      const dataUrl = await fileToDataUrl(file);
+      await analyzeAndCreateProduct({
+        data: { image_data_url: dataUrl, token: getAuthToken() },
+      });
+      await load();
+    } catch (err) {
+      setMsg(err instanceof Error ? err.message : "Analiz başarısız.");
+    } finally {
+      setAnalyzing(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-background font-sans text-foreground antialiased">
       <nav className="sticky top-0 z-50 border-b border-hairline bg-background/80 backdrop-blur-md">
