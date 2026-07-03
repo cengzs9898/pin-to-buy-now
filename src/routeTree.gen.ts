@@ -16,6 +16,7 @@ import { Route as GirisRouteImport } from './routes/giris'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as SaticiUrunlerRouteImport } from './routes/satici.urunler'
 import { Route as SaticiProfilRouteImport } from './routes/satici.profil'
+import { Route as ApiPublicProductImagesSplatRouteImport } from './routes/api/public/product-images.$'
 
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
   id: '/sitemap.xml',
@@ -52,6 +53,12 @@ const SaticiProfilRoute = SaticiProfilRouteImport.update({
   path: '/satici/profil',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicProductImagesSplatRoute =
+  ApiPublicProductImagesSplatRouteImport.update({
+    id: '/api/public/product-images/$',
+    path: '/api/public/product-images/$',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -61,6 +68,7 @@ export interface FileRoutesByFullPath {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/satici/profil': typeof SaticiProfilRoute
   '/satici/urunler': typeof SaticiUrunlerRoute
+  '/api/public/product-images/$': typeof ApiPublicProductImagesSplatRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -70,6 +78,7 @@ export interface FileRoutesByTo {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/satici/profil': typeof SaticiProfilRoute
   '/satici/urunler': typeof SaticiUrunlerRoute
+  '/api/public/product-images/$': typeof ApiPublicProductImagesSplatRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -80,6 +89,7 @@ export interface FileRoutesById {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/satici/profil': typeof SaticiProfilRoute
   '/satici/urunler': typeof SaticiUrunlerRoute
+  '/api/public/product-images/$': typeof ApiPublicProductImagesSplatRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -91,6 +101,7 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/satici/profil'
     | '/satici/urunler'
+    | '/api/public/product-images/$'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -100,6 +111,7 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/satici/profil'
     | '/satici/urunler'
+    | '/api/public/product-images/$'
   id:
     | '__root__'
     | '/'
@@ -109,6 +121,7 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/satici/profil'
     | '/satici/urunler'
+    | '/api/public/product-images/$'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -119,6 +132,7 @@ export interface RootRouteChildren {
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   SaticiProfilRoute: typeof SaticiProfilRoute
   SaticiUrunlerRoute: typeof SaticiUrunlerRoute
+  ApiPublicProductImagesSplatRoute: typeof ApiPublicProductImagesSplatRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -172,6 +186,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SaticiProfilRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/product-images/$': {
+      id: '/api/public/product-images/$'
+      path: '/api/public/product-images/$'
+      fullPath: '/api/public/product-images/$'
+      preLoaderRoute: typeof ApiPublicProductImagesSplatRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -183,7 +204,18 @@ const rootRouteChildren: RootRouteChildren = {
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   SaticiProfilRoute: SaticiProfilRoute,
   SaticiUrunlerRoute: SaticiUrunlerRoute,
+  ApiPublicProductImagesSplatRoute: ApiPublicProductImagesSplatRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
