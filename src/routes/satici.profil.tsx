@@ -162,9 +162,14 @@ function SaticiProfil() {
           <Link to="/" className="flex items-center gap-2" aria-label="Pintos">
             <img src={pintosLogo.url} alt="Pintos" className="h-8 w-auto" />
           </Link>
-          <Link to="/harita" className="text-sm text-muted-foreground hover:text-foreground">
-            Harita
-          </Link>
+          <div className="flex items-center gap-4 text-sm">
+            <Link to="/satici/urunler" className="text-muted-foreground hover:text-foreground">
+              Ürünlerim
+            </Link>
+            <Link to="/harita" className="text-muted-foreground hover:text-foreground">
+              Harita
+            </Link>
+          </div>
         </div>
       </nav>
 
