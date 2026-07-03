@@ -155,6 +155,44 @@ function SaticiUrunler() {
           <p className="mt-1 text-sm text-muted-foreground">Satır satır ürün ekle, listele ve sil.</p>
         </header>
 
+        <div className="mb-4 flex flex-wrap items-center gap-2 rounded-lg border border-dashed border-hairline bg-surface p-3">
+          <span className="mr-1 text-sm font-medium">Fotoğrafla otomatik ekle:</span>
+          <input
+            ref={cameraRef}
+            type="file"
+            accept="image/*"
+            capture="environment"
+            hidden
+            onChange={onPickImage}
+          />
+          <input
+            ref={fileRef}
+            type="file"
+            accept="image/*"
+            hidden
+            onChange={onPickImage}
+          />
+          <button
+            type="button"
+            disabled={analyzing}
+            onClick={() => cameraRef.current?.click()}
+            className="rounded bg-ink px-3 py-2 text-sm font-medium text-ink-foreground disabled:opacity-60"
+          >
+            📷 Fotoğraf çek
+          </button>
+          <button
+            type="button"
+            disabled={analyzing}
+            onClick={() => fileRef.current?.click()}
+            className="rounded border border-input bg-surface-2 px-3 py-2 text-sm font-medium disabled:opacity-60"
+          >
+            🖼️ Görsel yükle
+          </button>
+          {analyzing && (
+            <span className="text-xs text-muted-foreground">Analiz ediliyor, ürün ekleniyor…</span>
+          )}
+        </div>
+
         <form
           onSubmit={onAdd}
           className="mb-6 grid grid-cols-1 gap-2 rounded-lg border border-hairline bg-surface p-3 sm:grid-cols-[1fr_140px_1fr_auto]"
