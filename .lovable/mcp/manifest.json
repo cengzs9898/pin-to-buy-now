@@ -1,0 +1,70 @@
+{
+  "version": 1,
+  "sdk_version": "0.20.0",
+  "path": "/mcp",
+  "auth": {
+    "type": "none"
+  },
+  "mcp": {
+    "server": {
+      "name": "pintos-mcp",
+      "version": "0.1.0",
+      "title": "Pintos Marketplace"
+    },
+    "tools": [
+      {
+        "name": "list_products",
+        "title": "List marketplace products",
+        "description": "List active products in the Pintos marketplace. Optionally filter by a case-insensitive substring match on product name.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {
+            "query": {
+              "description": "Optional case-insensitive substring to match against product name.",
+              "type": "string",
+              "maxLength": 120
+            },
+            "limit": {
+              "description": "Maximum number of products to return (default 25, max 100).",
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100
+            }
+          }
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "get_product",
+        "title": "Get product by id",
+        "description": "Fetch a single Pintos marketplace product by its record id.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "minLength": 1,
+              "description": "Product record id."
+            }
+          },
+          "required": [
+            "id"
+          ]
+        },
+        "outputSchema": null
+      }
+    ]
+  }
+}
