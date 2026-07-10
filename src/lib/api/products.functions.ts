@@ -29,10 +29,13 @@ export const createProduct = createServerFn({ method: "POST" })
     if (!input?.name?.trim()) throw new Error("Ürün adı zorunlu.");
     const price = typeof input.price === "number" ? input.price : Number(input.price);
     if (!Number.isFinite(price) || price < 0) throw new Error("Geçerli fiyat girin.");
+    const category = input.category?.trim() ?? "";
+    if (category && !isValidSubcategory(category)) throw new Error("Geçersiz kategori.");
     return {
       name: input.name.trim(),
       price,
       image_url: input.image_url?.trim() ?? "",
+      category,
       token: input.token,
     };
   })
