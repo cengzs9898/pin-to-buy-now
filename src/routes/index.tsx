@@ -38,6 +38,7 @@ function Index() {
   const [query, setQuery] = useState("");
   const [visionState, setVisionState] = useState<"idle" | "loading" | "error">("idle");
   const [visionError, setVisionError] = useState<string | null>(null);
+  const [visionItems, setVisionItems] = useState<string[]>([]);
   const galleryInputRef = useRef<HTMLInputElement>(null);
   const cameraInputRef = useRef<HTMLInputElement>(null);
 
@@ -61,10 +62,12 @@ function Index() {
     try {
       setVisionState("loading");
       setVisionError(null);
+      setVisionItems([]);
       const imageDataUrl = await fileToDataUrl(file);
       const result = await visionSearch({ data: { imageDataUrl } });
       if (result.query) {
         setQuery(result.query);
+        setVisionItems(result.items ?? []);
         setVisionState("idle");
       } else {
         setVisionState("error");
@@ -75,6 +78,8 @@ function Index() {
       setVisionError(err instanceof Error ? err.message : "Bilinmeyen hata");
     }
   };
+
+
 
 
   return (
