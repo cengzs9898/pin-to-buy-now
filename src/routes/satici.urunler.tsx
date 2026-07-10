@@ -237,7 +237,7 @@ function SaticiUrunler() {
           </button>
         </form>
 
-        {msg && <p className="mb-3 text-sm text-red-600">{msg}</p>}
+        {msg && <p className="mb-3 text-sm text-muted-foreground">{msg}</p>}
 
         <div className="overflow-x-auto rounded-lg border border-hairline bg-surface">
           <table className="w-full border-collapse text-sm">
