@@ -27,9 +27,11 @@ function SaticiUrunler() {
   const [rows, setRows] = useState<Row[]>([]);
   const [loading, setLoading] = useState(true);
   const [msg, setMsg] = useState("");
-  const [form, setForm] = useState({ name: "", price: "", image_url: "" });
+  const [form, setForm] = useState({ name: "", price: "", image_url: "", category: "" });
   const [saving, setSaving] = useState(false);
   const [analyzing, setAnalyzing] = useState(false);
+  const [filterGroup, setFilterGroup] = useState<string>("");
+  const [filterSub, setFilterSub] = useState<string>("");
   const fileRef = useRef<HTMLInputElement>(null);
   const cameraRef = useRef<HTMLInputElement>(null);
 
