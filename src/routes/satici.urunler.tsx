@@ -1,5 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import pintosLogo from "@/assets/pintos-logo.png.asset.json";
 import {
   listMyProducts,
@@ -8,6 +8,7 @@ import {
   analyzeAndCreateProduct,
 } from "@/lib/api/products.functions";
 import { getAuthToken, clearAuthToken } from "@/lib/auth-token";
+import { CATEGORY_TREE, CATEGORY_GROUPS, groupOf } from "@/lib/categories";
 
 export const Route = createFileRoute("/satici/urunler")({
   head: () => ({
