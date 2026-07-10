@@ -325,6 +325,7 @@ function SaticiUrunler() {
               <tr>
                 <th className="w-16 border-b border-hairline px-3 py-2">Görsel</th>
                 <th className="border-b border-hairline px-3 py-2">Ürün Adı</th>
+                <th className="border-b border-hairline px-3 py-2">Kategori</th>
                 <th className="w-32 border-b border-hairline px-3 py-2 text-right">Fiyat</th>
                 <th className="w-20 border-b border-hairline px-3 py-2"></th>
               </tr>
@@ -332,19 +333,28 @@ function SaticiUrunler() {
             <tbody>
               {loading ? (
                 <tr>
-                  <td colSpan={4} className="px-3 py-6 text-center text-muted-foreground">
+                  <td colSpan={5} className="px-3 py-6 text-center text-muted-foreground">
                     Yükleniyor…
                   </td>
                 </tr>
-              ) : rows.length === 0 ? (
+              ) : filteredRows.length === 0 ? (
                 <tr>
-                  <td colSpan={4} className="px-3 py-6 text-center text-muted-foreground">
-                    Henüz ürün yok.
+                  <td colSpan={5} className="px-3 py-6 text-center text-muted-foreground">
+                    {rows.length === 0 ? "Henüz ürün yok." : "Bu filtreye uyan ürün yok."}
                   </td>
                 </tr>
               ) : (
-                rows.map((r) => {
-                  const f = r.fields as { name?: string; price?: number; image_url?: string; currency?: string };
+                filteredRows.map((r) => {
+                  const f = r.fields as {
+                    name?: string;
+                    price?: number;
+                    image_url?: string;
+                    currency?: string;
+                    category?: string;
+                    category_group?: string;
+                  };
+                  const sub = f.category ?? "";
+                  const grp = f.category_group ?? (sub ? (groupOf(sub) ?? "") : "");
                   return (
                     <tr key={r.id} className="border-b border-hairline last:border-0 hover:bg-surface-2">
                       <td className="px-3 py-2">
@@ -355,6 +365,16 @@ function SaticiUrunler() {
                         )}
                       </td>
                       <td className="px-3 py-2 font-medium">{f.name ?? "—"}</td>
+                      <td className="px-3 py-2 text-xs">
+                        {sub ? (
+                          <span className="inline-flex flex-col">
+                            <span className="font-medium">{sub}</span>
+                            {grp && <span className="text-muted-foreground">{grp}</span>}
+                          </span>
+                        ) : (
+                          <span className="text-muted-foreground">—</span>
+                        )}
+                      </td>
                       <td className="px-3 py-2 text-right tabular-nums">
                         {typeof f.price === "number" ? f.price.toFixed(2) : "—"} {f.currency ?? "TRY"}
                       </td>
