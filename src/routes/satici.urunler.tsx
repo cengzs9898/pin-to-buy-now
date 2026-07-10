@@ -164,7 +164,7 @@ function SaticiUrunler() {
         </header>
 
         <div className="mb-4 flex flex-wrap items-center gap-2 rounded-lg border border-dashed border-hairline bg-surface p-3">
-          <span className="mr-1 text-sm font-medium">Fotoğrafla otomatik ekle:</span>
+          <span className="mr-1 text-sm font-medium">Fotoğraf / fiş / fatura ile otomatik ekle:</span>
           <input
             ref={cameraRef}
             type="file"
