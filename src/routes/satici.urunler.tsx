@@ -120,9 +120,17 @@ function SaticiUrunler() {
     setMsg("");
     try {
       const dataUrl = await fileToDataUrl(file);
-      await analyzeAndCreateProduct({
+      const res = (await analyzeAndCreateProduct({
         data: { image_data_url: dataUrl, token: getAuthToken() },
-      });
+      })) as { isReceipt?: boolean; count?: number } | unknown;
+      const r = res as { isReceipt?: boolean; count?: number };
+      if (r?.count && r.count > 0) {
+        setMsg(
+          r.isReceipt
+            ? `Fiş/fatura tarandı: ${r.count} ürün eklendi.`
+            : `Ürün eklendi.`,
+        );
+      }
       await load();
     } catch (err) {
       setMsg(err instanceof Error ? err.message : "Analiz başarısız.");
@@ -156,7 +164,7 @@ function SaticiUrunler() {
         </header>
 
         <div className="mb-4 flex flex-wrap items-center gap-2 rounded-lg border border-dashed border-hairline bg-surface p-3">
-          <span className="mr-1 text-sm font-medium">Fotoğrafla otomatik ekle:</span>
+          <span className="mr-1 text-sm font-medium">Fotoğraf / fiş / fatura ile otomatik ekle:</span>
           <input
             ref={cameraRef}
             type="file"
@@ -229,7 +237,7 @@ function SaticiUrunler() {
           </button>
         </form>
 
-        {msg && <p className="mb-3 text-sm text-red-600">{msg}</p>}
+        {msg && <p className="mb-3 text-sm text-muted-foreground">{msg}</p>}
 
         <div className="overflow-x-auto rounded-lg border border-hairline bg-surface">
           <table className="w-full border-collapse text-sm">

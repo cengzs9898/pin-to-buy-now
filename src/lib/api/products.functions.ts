@@ -125,7 +125,7 @@ export const analyzeAndCreateProduct = createServerFn({ method: "POST" })
           {
             role: "system",
             content:
-              "Sen bir ürün kataloglama asistanısın. Görseldeki tek bir perakende ürünü tanımla. Sadece JSON döndür.",
+              "Sen bir ürün kataloglama asistanısın. Görsel bir market fişi / fatura / ürün listesi ise HER satırı ayrı ürün olarak çıkar. Aksi halde görseldeki tek ürünü çıkar. Sadece JSON döndür.",
           },
           {
             role: "user",
@@ -133,7 +133,7 @@ export const analyzeAndCreateProduct = createServerFn({ method: "POST" })
               {
                 type: "text",
                 text:
-                  'Bu görseldeki ürün için JSON döndür: {"name": "kısa Türkçe ürün adı, marka+çeşit varsa dahil", "price_try": tahmini perakende TRY fiyatı (sayı, tam sayı ya da ondalık; bilinmiyorsa 0)}. Sadece JSON döndür, başka metin yazma.',
+                  'Yanıt formatı: {"is_receipt": bool, "items": [{"name": "kısa Türkçe ürün adı (marka+çeşit+gramaj varsa dahil)", "price_try": TRY fiyatı (sayı; bilinmiyorsa 0)}]}. Fiş/fatura ise TOPLAM, ARA TOPLAM, KDV, TOPKDV, İSKONTO gibi satırları DAHİL ETME. En fazla 30 ürün. Sadece JSON döndür.',
               },
               { type: "image_url", image_url: { url: data.image_data_url } },
             ],
@@ -151,39 +151,74 @@ export const analyzeAndCreateProduct = createServerFn({ method: "POST" })
       choices?: { message?: { content?: string } }[];
     };
     const raw = aiJson.choices?.[0]?.message?.content ?? "{}";
-    let parsed: { name?: string; price_try?: number } = {};
+    let parsed: {
+      is_receipt?: boolean;
+      items?: Array<{ name?: string; price_try?: number }>;
+      name?: string;
+      price_try?: number;
+    } = {};
     try {
       parsed = JSON.parse(raw);
     } catch {
-      // try to extract JSON block
       const jm = raw.match(/\{[\s\S]*\}/);
       if (jm) parsed = JSON.parse(jm[0]);
     }
-    const name = (parsed.name ?? "").toString().trim() || "İsimsiz ürün";
-    const price =
-      typeof parsed.price_try === "number" && parsed.price_try >= 0 ? parsed.price_try : 0;
 
-    // 2) Görseli özel bucket'a yükle, public route üzerinden servis edilecek
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const bytes = Uint8Array.from(atob(b64), (c) => c.charCodeAt(0));
-    const key = `${s.sub}/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
-    const up = await supabaseAdmin.storage.from("product-images").upload(key, bytes, {
-      contentType: mime,
-      upsert: false,
-    });
-    if (up.error) throw new Error(`Görsel yüklenemedi: ${up.error.message}`);
+    let items: Array<{ name: string; price: number }> = [];
+    if (Array.isArray(parsed.items) && parsed.items.length > 0) {
+      items = parsed.items
+        .map((it) => {
+          const p = typeof it?.price_try === "number" ? it.price_try : Number(it?.price_try);
+          return {
+            name: (it?.name ?? "").toString().trim(),
+            price: Number.isFinite(p) && p >= 0 ? p : 0,
+          };
+        })
+        .filter((it) => it.name.length > 0)
+        .slice(0, 30);
+    } else {
+      const name = (parsed.name ?? "").toString().trim() || "İsimsiz ürün";
+      const price =
+        typeof parsed.price_try === "number" && parsed.price_try >= 0 ? parsed.price_try : 0;
+      items = [{ name, price }];
+    }
 
-    const image_url = `/api/public/product-images/${key}`;
+    if (items.length === 0) throw new Error("Görselde ürün bulunamadı.");
 
-    // 3) Airtable kaydını oluştur
-    const rec = await createRecord(TABLES.Products, {
-      name,
-      seller_email: s.email,
-      price,
-      currency: "TRY",
-      image_url,
-      is_active: true,
-      created_at: new Date().toISOString(),
-    });
-    return rec;
+    const isReceipt = Boolean(parsed.is_receipt) || items.length > 1;
+
+    const remaining = PRODUCT_LIMIT_PER_SELLER - count;
+    if (remaining <= 0) {
+      throw new Error(`Ürün limiti aşıldı (maks ${PRODUCT_LIMIT_PER_SELLER}).`);
+    }
+    if (items.length > remaining) items = items.slice(0, remaining);
+
+    // Görseli sadece tek ürün modunda ürün görseli olarak yükle
+    let image_url = "";
+    if (!isReceipt) {
+      const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+      const bytes = Uint8Array.from(atob(b64), (c) => c.charCodeAt(0));
+      const key = `${s.sub}/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
+      const up = await supabaseAdmin.storage.from("product-images").upload(key, bytes, {
+        contentType: mime,
+        upsert: false,
+      });
+      if (up.error) throw new Error(`Görsel yüklenemedi: ${up.error.message}`);
+      image_url = `/api/public/product-images/${key}`;
+    }
+
+    const created = [];
+    for (const it of items) {
+      const rec = await createRecord(TABLES.Products, {
+        name: it.name,
+        seller_email: s.email,
+        price: it.price,
+        currency: "TRY",
+        image_url,
+        is_active: true,
+        created_at: new Date().toISOString(),
+      });
+      created.push(rec);
+    }
+    return { isReceipt, count: created.length, records: created };
   });
