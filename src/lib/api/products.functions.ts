@@ -132,7 +132,8 @@ export const analyzeAndCreateProduct = createServerFn({ method: "POST" })
           {
             role: "system",
             content:
-              "Sen bir ürün kataloglama asistanısın. Görsel bir market fişi / fatura / ürün listesi ise HER satırı ayrı ürün olarak çıkar. Aksi halde görseldeki tek ürünü çıkar. Sadece JSON döndür.",
+              "Sen bir ürün kataloglama asistanısın. Görsel bir market fişi / fatura / ürün listesi ise HER satırı ayrı ürün olarak çıkar. Aksi halde görseldeki tek ürünü çıkar. Her ürünü SADECE aşağıdaki kategori taksonomisinden bir alt kategoriye ata. Liste dışına ASLA çıkma. Sadece JSON döndür.\n\nKATEGORİLER (üst grup: alt kategoriler):\n" +
+              categoryPromptList(),
           },
           {
             role: "user",
@@ -140,7 +141,7 @@ export const analyzeAndCreateProduct = createServerFn({ method: "POST" })
               {
                 type: "text",
                 text:
-                  'Yanıt formatı: {"is_receipt": bool, "items": [{"name": "kısa Türkçe ürün adı (marka+çeşit+gramaj varsa dahil)", "price_try": TRY fiyatı (sayı; bilinmiyorsa 0)}]}. Fiş/fatura ise TOPLAM, ARA TOPLAM, KDV, TOPKDV, İSKONTO gibi satırları DAHİL ETME. En fazla 30 ürün. Sadece JSON döndür.',
+                  'Yanıt formatı: {"is_receipt": bool, "items": [{"name": "kısa Türkçe ürün adı (marka+çeşit+gramaj varsa dahil)", "price_try": TRY fiyatı (sayı; bilinmiyorsa 0), "category": "yukarıdaki listedeki alt kategori adı, harfi harfine"}]}. Fiş/fatura ise TOPLAM, ARA TOPLAM, KDV, TOPKDV, İSKONTO gibi satırları DAHİL ETME. Kategori mutlaka listedeki tam ada eşit olmalı; emin değilsen en yakın alt kategoriyi seç. En fazla 30 ürün. Sadece JSON döndür.',
               },
               { type: "image_url", image_url: { url: data.image_data_url } },
             ],
