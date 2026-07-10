@@ -90,6 +90,18 @@ function SaticiUrunler() {
     }
   };
 
+  const filteredRows = useMemo(() => {
+    if (!filterGroup && !filterSub) return rows;
+    return rows.filter((r) => {
+      const f = r.fields as { category?: string; category_group?: string };
+      const sub = (f.category ?? "").toString();
+      const grp = (f.category_group ?? "").toString() || (sub ? (groupOf(sub) ?? "") : "");
+      if (filterSub) return sub === filterSub;
+      if (filterGroup) return grp === filterGroup;
+      return true;
+    });
+  }, [rows, filterGroup, filterSub]);
+
   // Downscale + convert to JPEG data URL to keep payload small
   const fileToDataUrl = (file: File): Promise<string> =>
     new Promise((resolve, reject) => {
