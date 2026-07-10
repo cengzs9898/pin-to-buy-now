@@ -67,10 +67,11 @@ function SaticiUrunler() {
           name: form.name.trim(),
           price: Number(form.price),
           image_url: form.image_url.trim(),
+          category: form.category,
           token: getAuthToken(),
         },
       });
-      setForm({ name: "", price: "", image_url: "" });
+      setForm({ name: "", price: "", image_url: "", category: "" });
       await load();
     } catch (err) {
       setMsg(err instanceof Error ? err.message : "Eklenemedi.");
