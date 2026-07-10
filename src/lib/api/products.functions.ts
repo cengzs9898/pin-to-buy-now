@@ -1,9 +1,11 @@
 import { createServerFn } from "@tanstack/react-start";
+import { isValidSubcategory, groupOf, categoryPromptList } from "@/lib/categories";
 
 type CreateProductInput = {
   name: string;
   price: number;
   image_url?: string;
+  category?: string;
   token?: string;
 };
 
@@ -27,10 +29,13 @@ export const createProduct = createServerFn({ method: "POST" })
     if (!input?.name?.trim()) throw new Error("Ürün adı zorunlu.");
     const price = typeof input.price === "number" ? input.price : Number(input.price);
     if (!Number.isFinite(price) || price < 0) throw new Error("Geçerli fiyat girin.");
+    const category = input.category?.trim() ?? "";
+    if (category && !isValidSubcategory(category)) throw new Error("Geçersiz kategori.");
     return {
       name: input.name.trim(),
       price,
       image_url: input.image_url?.trim() ?? "",
+      category,
       token: input.token,
     };
   })
@@ -53,6 +58,8 @@ export const createProduct = createServerFn({ method: "POST" })
       price: data.price,
       currency: "TRY",
       image_url: data.image_url,
+      category: data.category,
+      category_group: data.category ? (groupOf(data.category) ?? "") : "",
       is_active: true,
       created_at: new Date().toISOString(),
     });
@@ -125,7 +132,8 @@ export const analyzeAndCreateProduct = createServerFn({ method: "POST" })
           {
             role: "system",
             content:
-              "Sen bir ürün kataloglama asistanısın. Görsel bir market fişi / fatura / ürün listesi ise HER satırı ayrı ürün olarak çıkar. Aksi halde görseldeki tek ürünü çıkar. Sadece JSON döndür.",
+              "Sen bir ürün kataloglama asistanısın. Görsel bir market fişi / fatura / ürün listesi ise HER satırı ayrı ürün olarak çıkar. Aksi halde görseldeki tek ürünü çıkar. Her ürünü SADECE aşağıdaki kategori taksonomisinden bir alt kategoriye ata. Liste dışına ASLA çıkma. Sadece JSON döndür.\n\nKATEGORİLER (üst grup: alt kategoriler):\n" +
+              categoryPromptList(),
           },
           {
             role: "user",
@@ -133,7 +141,7 @@ export const analyzeAndCreateProduct = createServerFn({ method: "POST" })
               {
                 type: "text",
                 text:
-                  'Yanıt formatı: {"is_receipt": bool, "items": [{"name": "kısa Türkçe ürün adı (marka+çeşit+gramaj varsa dahil)", "price_try": TRY fiyatı (sayı; bilinmiyorsa 0)}]}. Fiş/fatura ise TOPLAM, ARA TOPLAM, KDV, TOPKDV, İSKONTO gibi satırları DAHİL ETME. En fazla 30 ürün. Sadece JSON döndür.',
+                  'Yanıt formatı: {"is_receipt": bool, "items": [{"name": "kısa Türkçe ürün adı (marka+çeşit+gramaj varsa dahil)", "price_try": TRY fiyatı (sayı; bilinmiyorsa 0), "category": "yukarıdaki listedeki alt kategori adı, harfi harfine"}]}. Fiş/fatura ise TOPLAM, ARA TOPLAM, KDV, TOPKDV, İSKONTO gibi satırları DAHİL ETME. Kategori mutlaka listedeki tam ada eşit olmalı; emin değilsen en yakın alt kategoriyi seç. En fazla 30 ürün. Sadece JSON döndür.',
               },
               { type: "image_url", image_url: { url: data.image_data_url } },
             ],
@@ -153,9 +161,10 @@ export const analyzeAndCreateProduct = createServerFn({ method: "POST" })
     const raw = aiJson.choices?.[0]?.message?.content ?? "{}";
     let parsed: {
       is_receipt?: boolean;
-      items?: Array<{ name?: string; price_try?: number }>;
+      items?: Array<{ name?: string; price_try?: number; category?: string }>;
       name?: string;
       price_try?: number;
+      category?: string;
     } = {};
     try {
       parsed = JSON.parse(raw);
@@ -164,14 +173,16 @@ export const analyzeAndCreateProduct = createServerFn({ method: "POST" })
       if (jm) parsed = JSON.parse(jm[0]);
     }
 
-    let items: Array<{ name: string; price: number }> = [];
+    let items: Array<{ name: string; price: number; category: string }> = [];
     if (Array.isArray(parsed.items) && parsed.items.length > 0) {
       items = parsed.items
         .map((it) => {
           const p = typeof it?.price_try === "number" ? it.price_try : Number(it?.price_try);
+          const c = (it?.category ?? "").toString().trim();
           return {
             name: (it?.name ?? "").toString().trim(),
             price: Number.isFinite(p) && p >= 0 ? p : 0,
+            category: isValidSubcategory(c) ? c : "",
           };
         })
         .filter((it) => it.name.length > 0)
@@ -180,7 +191,8 @@ export const analyzeAndCreateProduct = createServerFn({ method: "POST" })
       const name = (parsed.name ?? "").toString().trim() || "İsimsiz ürün";
       const price =
         typeof parsed.price_try === "number" && parsed.price_try >= 0 ? parsed.price_try : 0;
-      items = [{ name, price }];
+      const c = (parsed.category ?? "").toString().trim();
+      items = [{ name, price, category: isValidSubcategory(c) ? c : "" }];
     }
 
     if (items.length === 0) throw new Error("Görselde ürün bulunamadı.");
@@ -215,6 +227,8 @@ export const analyzeAndCreateProduct = createServerFn({ method: "POST" })
         price: it.price,
         currency: "TRY",
         image_url,
+        category: it.category,
+        category_group: it.category ? (groupOf(it.category) ?? "") : "",
         is_active: true,
         created_at: new Date().toISOString(),
       });

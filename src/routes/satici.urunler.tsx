@@ -1,5 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import pintosLogo from "@/assets/pintos-logo.png.asset.json";
 import {
   listMyProducts,
@@ -8,6 +8,7 @@ import {
   analyzeAndCreateProduct,
 } from "@/lib/api/products.functions";
 import { getAuthToken, clearAuthToken } from "@/lib/auth-token";
+import { CATEGORY_TREE, CATEGORY_GROUPS, groupOf } from "@/lib/categories";
 
 export const Route = createFileRoute("/satici/urunler")({
   head: () => ({
@@ -26,9 +27,11 @@ function SaticiUrunler() {
   const [rows, setRows] = useState<Row[]>([]);
   const [loading, setLoading] = useState(true);
   const [msg, setMsg] = useState("");
-  const [form, setForm] = useState({ name: "", price: "", image_url: "" });
+  const [form, setForm] = useState({ name: "", price: "", image_url: "", category: "" });
   const [saving, setSaving] = useState(false);
   const [analyzing, setAnalyzing] = useState(false);
+  const [filterGroup, setFilterGroup] = useState<string>("");
+  const [filterSub, setFilterSub] = useState<string>("");
   const fileRef = useRef<HTMLInputElement>(null);
   const cameraRef = useRef<HTMLInputElement>(null);
 
@@ -64,10 +67,11 @@ function SaticiUrunler() {
           name: form.name.trim(),
           price: Number(form.price),
           image_url: form.image_url.trim(),
+          category: form.category,
           token: getAuthToken(),
         },
       });
-      setForm({ name: "", price: "", image_url: "" });
+      setForm({ name: "", price: "", image_url: "", category: "" });
       await load();
     } catch (err) {
       setMsg(err instanceof Error ? err.message : "Eklenemedi.");
@@ -85,6 +89,18 @@ function SaticiUrunler() {
       setMsg(err instanceof Error ? err.message : "Silinemedi.");
     }
   };
+
+  const filteredRows = useMemo(() => {
+    if (!filterGroup && !filterSub) return rows;
+    return rows.filter((r) => {
+      const f = r.fields as { category?: string; category_group?: string };
+      const sub = (f.category ?? "").toString();
+      const grp = (f.category_group ?? "").toString() || (sub ? (groupOf(sub) ?? "") : "");
+      if (filterSub) return sub === filterSub;
+      if (filterGroup) return grp === filterGroup;
+      return true;
+    });
+  }, [rows, filterGroup, filterSub]);
 
   // Downscale + convert to JPEG data URL to keep payload small
   const fileToDataUrl = (file: File): Promise<string> =>
@@ -203,7 +219,7 @@ function SaticiUrunler() {
 
         <form
           onSubmit={onAdd}
-          className="mb-6 grid grid-cols-1 gap-2 rounded-lg border border-hairline bg-surface p-3 sm:grid-cols-[1fr_140px_1fr_auto]"
+          className="mb-4 grid grid-cols-1 gap-2 rounded-lg border border-hairline bg-surface p-3 sm:grid-cols-2 lg:grid-cols-[1fr_120px_1fr_1fr_auto]"
         >
           <input
             required
@@ -222,6 +238,22 @@ function SaticiUrunler() {
             onChange={(e) => setForm((p) => ({ ...p, price: e.target.value }))}
             className="rounded border border-input bg-surface-2 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-brand"
           />
+          <select
+            value={form.category}
+            onChange={(e) => setForm((p) => ({ ...p, category: e.target.value }))}
+            className="rounded border border-input bg-surface-2 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-brand"
+          >
+            <option value="">Kategori seç (opsiyonel)</option>
+            {CATEGORY_GROUPS.map((g) => (
+              <optgroup key={g} label={g}>
+                {CATEGORY_TREE[g].map((s) => (
+                  <option key={s} value={s}>
+                    {s}
+                  </option>
+                ))}
+              </optgroup>
+            ))}
+          </select>
           <input
             placeholder="Görsel URL (opsiyonel)"
             value={form.image_url}
@@ -237,6 +269,54 @@ function SaticiUrunler() {
           </button>
         </form>
 
+        <div className="mb-4 flex flex-wrap items-center gap-2 text-sm">
+          <span className="text-xs uppercase tracking-wider text-muted-foreground">Filtre:</span>
+          <select
+            value={filterGroup}
+            onChange={(e) => {
+              setFilterGroup(e.target.value);
+              setFilterSub("");
+            }}
+            className="rounded border border-input bg-surface-2 px-2 py-1 text-sm"
+          >
+            <option value="">Tüm gruplar</option>
+            {CATEGORY_GROUPS.map((g) => (
+              <option key={g} value={g}>
+                {g}
+              </option>
+            ))}
+          </select>
+          {filterGroup && (
+            <select
+              value={filterSub}
+              onChange={(e) => setFilterSub(e.target.value)}
+              className="rounded border border-input bg-surface-2 px-2 py-1 text-sm"
+            >
+              <option value="">Tüm alt kategoriler</option>
+              {CATEGORY_TREE[filterGroup as keyof typeof CATEGORY_TREE].map((s) => (
+                <option key={s} value={s}>
+                  {s}
+                </option>
+              ))}
+            </select>
+          )}
+          {(filterGroup || filterSub) && (
+            <button
+              type="button"
+              onClick={() => {
+                setFilterGroup("");
+                setFilterSub("");
+              }}
+              className="text-xs text-muted-foreground underline hover:text-foreground"
+            >
+              Temizle
+            </button>
+          )}
+          <span className="ml-auto text-xs text-muted-foreground">
+            {filteredRows.length} / {rows.length} ürün
+          </span>
+        </div>
+
         {msg && <p className="mb-3 text-sm text-muted-foreground">{msg}</p>}
 
         <div className="overflow-x-auto rounded-lg border border-hairline bg-surface">
@@ -245,6 +325,7 @@ function SaticiUrunler() {
               <tr>
                 <th className="w-16 border-b border-hairline px-3 py-2">Görsel</th>
                 <th className="border-b border-hairline px-3 py-2">Ürün Adı</th>
+                <th className="border-b border-hairline px-3 py-2">Kategori</th>
                 <th className="w-32 border-b border-hairline px-3 py-2 text-right">Fiyat</th>
                 <th className="w-20 border-b border-hairline px-3 py-2"></th>
               </tr>
@@ -252,19 +333,28 @@ function SaticiUrunler() {
             <tbody>
               {loading ? (
                 <tr>
-                  <td colSpan={4} className="px-3 py-6 text-center text-muted-foreground">
+                  <td colSpan={5} className="px-3 py-6 text-center text-muted-foreground">
                     Yükleniyor…
                   </td>
                 </tr>
-              ) : rows.length === 0 ? (
+              ) : filteredRows.length === 0 ? (
                 <tr>
-                  <td colSpan={4} className="px-3 py-6 text-center text-muted-foreground">
-                    Henüz ürün yok.
+                  <td colSpan={5} className="px-3 py-6 text-center text-muted-foreground">
+                    {rows.length === 0 ? "Henüz ürün yok." : "Bu filtreye uyan ürün yok."}
                   </td>
                 </tr>
               ) : (
-                rows.map((r) => {
-                  const f = r.fields as { name?: string; price?: number; image_url?: string; currency?: string };
+                filteredRows.map((r) => {
+                  const f = r.fields as {
+                    name?: string;
+                    price?: number;
+                    image_url?: string;
+                    currency?: string;
+                    category?: string;
+                    category_group?: string;
+                  };
+                  const sub = f.category ?? "";
+                  const grp = f.category_group ?? (sub ? (groupOf(sub) ?? "") : "");
                   return (
                     <tr key={r.id} className="border-b border-hairline last:border-0 hover:bg-surface-2">
                       <td className="px-3 py-2">
@@ -275,6 +365,16 @@ function SaticiUrunler() {
                         )}
                       </td>
                       <td className="px-3 py-2 font-medium">{f.name ?? "—"}</td>
+                      <td className="px-3 py-2 text-xs">
+                        {sub ? (
+                          <span className="inline-flex flex-col">
+                            <span className="font-medium">{sub}</span>
+                            {grp && <span className="text-muted-foreground">{grp}</span>}
+                          </span>
+                        ) : (
+                          <span className="text-muted-foreground">—</span>
+                        )}
+                      </td>
                       <td className="px-3 py-2 text-right tabular-nums">
                         {typeof f.price === "number" ? f.price.toFixed(2) : "—"} {f.currency ?? "TRY"}
                       </td>
