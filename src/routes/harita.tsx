@@ -126,6 +126,7 @@ function HaritaPage() {
   const [query, setQuery] = useState("");
   const [visionState, setVisionState] = useState<"idle" | "loading" | "error">("idle");
   const [visionError, setVisionError] = useState<string | null>(null);
+  const [visionItems, setVisionItems] = useState<string[]>([]);
   const galleryInputRef = useRef<HTMLInputElement>(null);
   const cameraInputRef = useRef<HTMLInputElement>(null);
 
@@ -149,10 +150,12 @@ function HaritaPage() {
     try {
       setVisionState("loading");
       setVisionError(null);
+      setVisionItems([]);
       const imageDataUrl = await fileToDataUrl(file);
       const result = await visionSearch({ data: { imageDataUrl } });
       if (result.query) {
         setQuery(result.query);
+        setVisionItems(result.items ?? []);
         setVisionState("idle");
       } else {
         setVisionState("error");
@@ -163,6 +166,7 @@ function HaritaPage() {
       setVisionError(err instanceof Error ? err.message : "Bilinmeyen hata");
     }
   };
+
 
   useEffect(() => {
     if (!("geolocation" in navigator)) {
