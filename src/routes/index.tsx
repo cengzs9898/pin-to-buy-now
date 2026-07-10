@@ -224,6 +224,30 @@ function Index() {
                   Görsel AI ile inceleniyor, ürün tanımlanıyor...
                 </p>
               )}
+              {visionItems.length > 1 && visionState === "idle" && (
+                <div className="mt-3">
+                  <p className="mb-2 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
+                    Fişten çıkan {visionItems.length} ürün — birini seç:
+                  </p>
+                  <div className="flex flex-wrap gap-2">
+                    {visionItems.map((item, i) => (
+                      <button
+                        key={`${item}-${i}`}
+                        type="button"
+                        onClick={() => setQuery(item)}
+                        className={`rounded-full border px-3 py-1 text-xs transition-colors ${
+                          query === item
+                            ? "border-brand bg-brand text-brand-foreground"
+                            : "border-hairline bg-surface-2 text-foreground hover:bg-surface-3"
+                        }`}
+                      >
+                        {item}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
 
 
               <div className="mt-4 flex flex-wrap items-center justify-center gap-3">
