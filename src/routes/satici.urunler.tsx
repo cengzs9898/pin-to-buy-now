@@ -120,9 +120,17 @@ function SaticiUrunler() {
     setMsg("");
     try {
       const dataUrl = await fileToDataUrl(file);
-      await analyzeAndCreateProduct({
+      const res = (await analyzeAndCreateProduct({
         data: { image_data_url: dataUrl, token: getAuthToken() },
-      });
+      })) as { isReceipt?: boolean; count?: number } | unknown;
+      const r = res as { isReceipt?: boolean; count?: number };
+      if (r?.count && r.count > 0) {
+        setMsg(
+          r.isReceipt
+            ? `Fiş/fatura tarandı: ${r.count} ürün eklendi.`
+            : `Ürün eklendi.`,
+        );
+      }
       await load();
     } catch (err) {
       setMsg(err instanceof Error ? err.message : "Analiz başarısız.");
