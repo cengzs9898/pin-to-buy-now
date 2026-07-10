@@ -161,9 +161,10 @@ export const analyzeAndCreateProduct = createServerFn({ method: "POST" })
     const raw = aiJson.choices?.[0]?.message?.content ?? "{}";
     let parsed: {
       is_receipt?: boolean;
-      items?: Array<{ name?: string; price_try?: number }>;
+      items?: Array<{ name?: string; price_try?: number; category?: string }>;
       name?: string;
       price_try?: number;
+      category?: string;
     } = {};
     try {
       parsed = JSON.parse(raw);
@@ -172,14 +173,16 @@ export const analyzeAndCreateProduct = createServerFn({ method: "POST" })
       if (jm) parsed = JSON.parse(jm[0]);
     }
 
-    let items: Array<{ name: string; price: number }> = [];
+    let items: Array<{ name: string; price: number; category: string }> = [];
     if (Array.isArray(parsed.items) && parsed.items.length > 0) {
       items = parsed.items
         .map((it) => {
           const p = typeof it?.price_try === "number" ? it.price_try : Number(it?.price_try);
+          const c = (it?.category ?? "").toString().trim();
           return {
             name: (it?.name ?? "").toString().trim(),
             price: Number.isFinite(p) && p >= 0 ? p : 0,
+            category: isValidSubcategory(c) ? c : "",
           };
         })
         .filter((it) => it.name.length > 0)
@@ -188,7 +191,8 @@ export const analyzeAndCreateProduct = createServerFn({ method: "POST" })
       const name = (parsed.name ?? "").toString().trim() || "İsimsiz ürün";
       const price =
         typeof parsed.price_try === "number" && parsed.price_try >= 0 ? parsed.price_try : 0;
-      items = [{ name, price }];
+      const c = (parsed.category ?? "").toString().trim();
+      items = [{ name, price, category: isValidSubcategory(c) ? c : "" }];
     }
 
     if (items.length === 0) throw new Error("Görselde ürün bulunamadı.");
