@@ -207,7 +207,7 @@ function SaticiUrunler() {
 
         <form
           onSubmit={onAdd}
-          className="mb-6 grid grid-cols-1 gap-2 rounded-lg border border-hairline bg-surface p-3 sm:grid-cols-[1fr_140px_1fr_auto]"
+          className="mb-4 grid grid-cols-1 gap-2 rounded-lg border border-hairline bg-surface p-3 sm:grid-cols-2 lg:grid-cols-[1fr_120px_1fr_1fr_auto]"
         >
           <input
             required
@@ -226,6 +226,22 @@ function SaticiUrunler() {
             onChange={(e) => setForm((p) => ({ ...p, price: e.target.value }))}
             className="rounded border border-input bg-surface-2 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-brand"
           />
+          <select
+            value={form.category}
+            onChange={(e) => setForm((p) => ({ ...p, category: e.target.value }))}
+            className="rounded border border-input bg-surface-2 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-brand"
+          >
+            <option value="">Kategori seç (opsiyonel)</option>
+            {CATEGORY_GROUPS.map((g) => (
+              <optgroup key={g} label={g}>
+                {CATEGORY_TREE[g].map((s) => (
+                  <option key={s} value={s}>
+                    {s}
+                  </option>
+                ))}
+              </optgroup>
+            ))}
+          </select>
           <input
             placeholder="Görsel URL (opsiyonel)"
             value={form.image_url}
@@ -240,6 +256,54 @@ function SaticiUrunler() {
             {saving ? "Ekleniyor…" : "Ekle"}
           </button>
         </form>
+
+        <div className="mb-4 flex flex-wrap items-center gap-2 text-sm">
+          <span className="text-xs uppercase tracking-wider text-muted-foreground">Filtre:</span>
+          <select
+            value={filterGroup}
+            onChange={(e) => {
+              setFilterGroup(e.target.value);
+              setFilterSub("");
+            }}
+            className="rounded border border-input bg-surface-2 px-2 py-1 text-sm"
+          >
+            <option value="">Tüm gruplar</option>
+            {CATEGORY_GROUPS.map((g) => (
+              <option key={g} value={g}>
+                {g}
+              </option>
+            ))}
+          </select>
+          {filterGroup && (
+            <select
+              value={filterSub}
+              onChange={(e) => setFilterSub(e.target.value)}
+              className="rounded border border-input bg-surface-2 px-2 py-1 text-sm"
+            >
+              <option value="">Tüm alt kategoriler</option>
+              {CATEGORY_TREE[filterGroup as keyof typeof CATEGORY_TREE].map((s) => (
+                <option key={s} value={s}>
+                  {s}
+                </option>
+              ))}
+            </select>
+          )}
+          {(filterGroup || filterSub) && (
+            <button
+              type="button"
+              onClick={() => {
+                setFilterGroup("");
+                setFilterSub("");
+              }}
+              className="text-xs text-muted-foreground underline hover:text-foreground"
+            >
+              Temizle
+            </button>
+          )}
+          <span className="ml-auto text-xs text-muted-foreground">
+            {filteredRows.length} / {rows.length} ürün
+          </span>
+        </div>
 
         {msg && <p className="mb-3 text-sm text-muted-foreground">{msg}</p>}
 
