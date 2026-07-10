@@ -126,6 +126,7 @@ function HaritaPage() {
   const [query, setQuery] = useState("");
   const [visionState, setVisionState] = useState<"idle" | "loading" | "error">("idle");
   const [visionError, setVisionError] = useState<string | null>(null);
+  const [visionItems, setVisionItems] = useState<string[]>([]);
   const galleryInputRef = useRef<HTMLInputElement>(null);
   const cameraInputRef = useRef<HTMLInputElement>(null);
 
@@ -149,10 +150,12 @@ function HaritaPage() {
     try {
       setVisionState("loading");
       setVisionError(null);
+      setVisionItems([]);
       const imageDataUrl = await fileToDataUrl(file);
       const result = await visionSearch({ data: { imageDataUrl } });
       if (result.query) {
         setQuery(result.query);
+        setVisionItems(result.items ?? []);
         setVisionState("idle");
       } else {
         setVisionState("error");
@@ -163,6 +166,7 @@ function HaritaPage() {
       setVisionError(err instanceof Error ? err.message : "Bilinmeyen hata");
     }
   };
+
 
   useEffect(() => {
     if (!("geolocation" in navigator)) {
@@ -326,7 +330,31 @@ function HaritaPage() {
               {visionState === "error" && visionError && (
                 <p className="mt-2 font-mono text-[10px] text-destructive">{visionError}</p>
               )}
+              {visionItems.length > 1 && visionState === "idle" && (
+                <div className="mt-2">
+                  <p className="mb-1 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
+                    Fişten {visionItems.length} ürün:
+                  </p>
+                  <div className="flex flex-wrap gap-1">
+                    {visionItems.map((item, i) => (
+                      <button
+                        key={`${item}-${i}`}
+                        type="button"
+                        onClick={() => setQuery(item)}
+                        className={`rounded-full border px-2 py-0.5 text-[11px] transition-colors ${
+                          query === item
+                            ? "border-brand bg-brand text-brand-foreground"
+                            : "border-hairline bg-background hover:bg-muted"
+                        }`}
+                      >
+                        {item}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
+
 
             <div className="mb-3 flex gap-1 rounded-lg bg-background p-1 ring-1 ring-black/5">
               {FILTERS.map((f) => (

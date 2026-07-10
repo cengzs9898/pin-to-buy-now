@@ -38,6 +38,7 @@ function Index() {
   const [query, setQuery] = useState("");
   const [visionState, setVisionState] = useState<"idle" | "loading" | "error">("idle");
   const [visionError, setVisionError] = useState<string | null>(null);
+  const [visionItems, setVisionItems] = useState<string[]>([]);
   const galleryInputRef = useRef<HTMLInputElement>(null);
   const cameraInputRef = useRef<HTMLInputElement>(null);
 
@@ -61,10 +62,12 @@ function Index() {
     try {
       setVisionState("loading");
       setVisionError(null);
+      setVisionItems([]);
       const imageDataUrl = await fileToDataUrl(file);
       const result = await visionSearch({ data: { imageDataUrl } });
       if (result.query) {
         setQuery(result.query);
+        setVisionItems(result.items ?? []);
         setVisionState("idle");
       } else {
         setVisionState("error");
@@ -75,6 +78,8 @@ function Index() {
       setVisionError(err instanceof Error ? err.message : "Bilinmeyen hata");
     }
   };
+
+
 
 
   return (
@@ -219,6 +224,30 @@ function Index() {
                   Görsel AI ile inceleniyor, ürün tanımlanıyor...
                 </p>
               )}
+              {visionItems.length > 1 && visionState === "idle" && (
+                <div className="mt-3">
+                  <p className="mb-2 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
+                    Fişten çıkan {visionItems.length} ürün — birini seç:
+                  </p>
+                  <div className="flex flex-wrap gap-2">
+                    {visionItems.map((item, i) => (
+                      <button
+                        key={`${item}-${i}`}
+                        type="button"
+                        onClick={() => setQuery(item)}
+                        className={`rounded-full border px-3 py-1 text-xs transition-colors ${
+                          query === item
+                            ? "border-brand bg-brand text-brand-foreground"
+                            : "border-hairline bg-surface-2 text-foreground hover:bg-surface-3"
+                        }`}
+                      >
+                        {item}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
 
 
               <div className="mt-4 flex flex-wrap items-center justify-center gap-3">
