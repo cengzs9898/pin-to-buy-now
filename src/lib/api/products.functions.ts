@@ -227,6 +227,8 @@ export const analyzeAndCreateProduct = createServerFn({ method: "POST" })
         price: it.price,
         currency: "TRY",
         image_url,
+        category: it.category,
+        category_group: it.category ? (groupOf(it.category) ?? "") : "",
         is_active: true,
         created_at: new Date().toISOString(),
       });
