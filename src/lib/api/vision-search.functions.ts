@@ -26,16 +26,21 @@ export const visionSearch = createServerFn({ method: "POST" })
           {
             role: "system",
             content:
-              "Görseldeki ürünü tanımla. Sadece kısa Türkçe bir arama sorgusu döndür (en fazla 5 kelime). Marka + ürün tipi formatında, açıklama yok.",
+              "Sen görsel bir alışveriş asistanısın. Görselde tek bir ürün varsa tek ürün, fiş/fatura/liste ise TÜM satırları çıkar. Sadece JSON döndür.",
           },
           {
             role: "user",
             content: [
-              { type: "text", text: "Bu ürün için arama sorgusu üret." },
+              {
+                type: "text",
+                text:
+                  'Görseli incele. Eğer bir market fişi, fatura veya ürün listesi ise her satırdaki ürünü ayrı ayrı çıkar. Aksi halde görseldeki tek ürünü döndür. Yanıt formatı: {"is_receipt": bool, "items": ["kısa Türkçe arama sorgusu 1", "sorgu 2", ...]}. Her sorgu en fazla 5 kelime, marka+ürün tipi. Fiyat/adet/KDV yazma. Sadece JSON döndür.',
+              },
               { type: "image_url", image_url: { url: data.imageDataUrl } },
             ],
           },
         ],
+        response_format: { type: "json_object" },
       }),
     });
 
@@ -47,6 +52,26 @@ export const visionSearch = createServerFn({ method: "POST" })
     const json = (await res.json()) as {
       choices?: Array<{ message?: { content?: string } }>;
     };
-    const query = (json.choices?.[0]?.message?.content ?? "").trim().replace(/^["']|["']$/g, "");
-    return { query };
+    const raw = (json.choices?.[0]?.message?.content ?? "").trim();
+    let parsed: { is_receipt?: boolean; items?: unknown } = {};
+    try {
+      parsed = JSON.parse(raw);
+    } catch {
+      const m = raw.match(/\{[\s\S]*\}/);
+      if (m) {
+        try {
+          parsed = JSON.parse(m[0]);
+        } catch {
+          /* ignore */
+        }
+      }
+    }
+    const items = Array.isArray(parsed.items)
+      ? (parsed.items as unknown[])
+          .map((v) => (typeof v === "string" ? v.trim().replace(/^["']|["']$/g, "") : ""))
+          .filter((s) => s.length > 0)
+          .slice(0, 30)
+      : [];
+    const query = items[0] ?? "";
+    return { query, items, isReceipt: Boolean(parsed.is_receipt) };
   });
