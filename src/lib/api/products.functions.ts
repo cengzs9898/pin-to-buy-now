@@ -1,9 +1,11 @@
 import { createServerFn } from "@tanstack/react-start";
+import { isValidSubcategory, groupOf, categoryPromptList } from "@/lib/categories";
 
 type CreateProductInput = {
   name: string;
   price: number;
   image_url?: string;
+  category?: string;
   token?: string;
 };
 
