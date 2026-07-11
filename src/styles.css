@@ -51,6 +51,9 @@
 
   --color-brand: var(--brand);
   --color-brand-foreground: var(--brand-foreground);
+  --color-brand-2: var(--brand-2);
+  --color-brand-3: var(--brand-3);
+  --color-brand-4: var(--brand-4);
   --color-ink: var(--ink);
   --color-ink-foreground: var(--ink-foreground);
   --color-surface: var(--surface);
@@ -61,10 +64,11 @@
 }
 
 :root {
-  --radius: 0.75rem;
+  --radius: 1rem;
 
-  /* Tactical Utility palette — warm amber on bone */
-  --background: oklch(0.968 0.003 80);          /* #f4f4f5-ish bone */
+  /* Sunset Blaze on light bone */
+  --background: oklch(0.985 0.003 80);
+
   --foreground: oklch(0.21 0.012 264);          /* zinc-900 */
   --surface: oklch(0.985 0.003 80);             /* card bg */
   --surface-2: oklch(1 0 0);                    /* pure white */
