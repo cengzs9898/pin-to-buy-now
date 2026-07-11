@@ -59,7 +59,7 @@ export const createProduct = createServerFn({ method: "POST" })
       currency: "TRY",
       image_url: data.image_url,
       category: data.category,
-      category_group: data.category ? (groupOf(data.category) ?? "") : "",
+      
       is_active: true,
       created_at: new Date().toISOString(),
     });
