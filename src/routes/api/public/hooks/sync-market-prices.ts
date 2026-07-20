@@ -37,7 +37,23 @@ export const Route = createFileRoute("/api/public/hooks/sync-market-prices")({
       POST: async () => {
         const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
         const now = new Date().toISOString();
-        const rows: Record<string, unknown>[] = [];
+        type Row = {
+          id: string;
+          product_id: string;
+          title: string;
+          brand: string | null;
+          image_url: string | null;
+          main_category: string | null;
+          menu_category: string | null;
+          market: string;
+          depot_id: string;
+          depot_name: string | null;
+          price: number;
+          unit_price: string | null;
+          index_time: string | null;
+          updated_at: string;
+        };
+        const rows: Row[] = [];
         const seen = new Set<string>();
 
         for (const kw of SYNC_KEYWORDS) {
