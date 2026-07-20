@@ -15,7 +15,8 @@ export const Route = createFileRoute("/market-fiyatlari")({
       { property: "og:description", content: "Haftalık güncellenen market fiyat karşılaştırması." },
     ],
   }),
-  loader: () => listMarketPrices(),
+  loader: async (): Promise<{ rows: MarketPriceRow[]; lastUpdated: string | null }> =>
+    (await listMarketPrices()) as { rows: MarketPriceRow[]; lastUpdated: string | null },
   component: MarketPricesPage,
 });
 
