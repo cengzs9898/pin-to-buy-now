@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as McpRouteImport } from './routes/mcp'
+import { Route as MarketFiyatlariRouteImport } from './routes/market-fiyatlari'
 import { Route as KayitOlRouteImport } from './routes/kayit-ol'
 import { Route as HaritaRouteImport } from './routes/harita'
 import { Route as GirisRouteImport } from './routes/giris'
@@ -21,6 +22,7 @@ import { Route as Char91DotwellKnownChar93OauthProtectedResourceRouteImport } fr
 import { Route as Char91DotmcpChar93ListToolsRouteImport } from './routes/[.mcp]/list-tools'
 import { Route as Char91DotmcpChar93InvokeToolToolRouteImport } from './routes/[.mcp]/invoke-tool/$tool'
 import { Route as ApiPublicProductImagesSplatRouteImport } from './routes/api/public/product-images.$'
+import { Route as ApiPublicHooksSyncMarketPricesRouteImport } from './routes/api/public/hooks/sync-market-prices'
 
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
   id: '/sitemap.xml',
@@ -30,6 +32,11 @@ const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
 const McpRoute = McpRouteImport.update({
   id: '/mcp',
   path: '/mcp',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MarketFiyatlariRoute = MarketFiyatlariRouteImport.update({
+  id: '/market-fiyatlari',
+  path: '/market-fiyatlari',
   getParentRoute: () => rootRouteImport,
 } as any)
 const KayitOlRoute = KayitOlRouteImport.update({
@@ -86,12 +93,19 @@ const ApiPublicProductImagesSplatRoute =
     path: '/api/public/product-images/$',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiPublicHooksSyncMarketPricesRoute =
+  ApiPublicHooksSyncMarketPricesRouteImport.update({
+    id: '/api/public/hooks/sync-market-prices',
+    path: '/api/public/hooks/sync-market-prices',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/giris': typeof GirisRoute
   '/harita': typeof HaritaRoute
   '/kayit-ol': typeof KayitOlRoute
+  '/market-fiyatlari': typeof MarketFiyatlariRoute
   '/mcp': typeof McpRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
@@ -99,6 +113,7 @@ export interface FileRoutesByFullPath {
   '/satici/profil': typeof SaticiProfilRoute
   '/satici/urunler': typeof SaticiUrunlerRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
+  '/api/public/hooks/sync-market-prices': typeof ApiPublicHooksSyncMarketPricesRoute
   '/api/public/product-images/$': typeof ApiPublicProductImagesSplatRoute
 }
 export interface FileRoutesByTo {
@@ -106,6 +121,7 @@ export interface FileRoutesByTo {
   '/giris': typeof GirisRoute
   '/harita': typeof HaritaRoute
   '/kayit-ol': typeof KayitOlRoute
+  '/market-fiyatlari': typeof MarketFiyatlariRoute
   '/mcp': typeof McpRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
@@ -113,6 +129,7 @@ export interface FileRoutesByTo {
   '/satici/profil': typeof SaticiProfilRoute
   '/satici/urunler': typeof SaticiUrunlerRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
+  '/api/public/hooks/sync-market-prices': typeof ApiPublicHooksSyncMarketPricesRoute
   '/api/public/product-images/$': typeof ApiPublicProductImagesSplatRoute
 }
 export interface FileRoutesById {
@@ -121,6 +138,7 @@ export interface FileRoutesById {
   '/giris': typeof GirisRoute
   '/harita': typeof HaritaRoute
   '/kayit-ol': typeof KayitOlRoute
+  '/market-fiyatlari': typeof MarketFiyatlariRoute
   '/mcp': typeof McpRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
@@ -128,6 +146,7 @@ export interface FileRoutesById {
   '/satici/profil': typeof SaticiProfilRoute
   '/satici/urunler': typeof SaticiUrunlerRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
+  '/api/public/hooks/sync-market-prices': typeof ApiPublicHooksSyncMarketPricesRoute
   '/api/public/product-images/$': typeof ApiPublicProductImagesSplatRoute
 }
 export interface FileRouteTypes {
@@ -137,6 +156,7 @@ export interface FileRouteTypes {
     | '/giris'
     | '/harita'
     | '/kayit-ol'
+    | '/market-fiyatlari'
     | '/mcp'
     | '/sitemap.xml'
     | '/.mcp/list-tools'
@@ -144,6 +164,7 @@ export interface FileRouteTypes {
     | '/satici/profil'
     | '/satici/urunler'
     | '/.mcp/invoke-tool/$tool'
+    | '/api/public/hooks/sync-market-prices'
     | '/api/public/product-images/$'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -151,6 +172,7 @@ export interface FileRouteTypes {
     | '/giris'
     | '/harita'
     | '/kayit-ol'
+    | '/market-fiyatlari'
     | '/mcp'
     | '/sitemap.xml'
     | '/.mcp/list-tools'
@@ -158,6 +180,7 @@ export interface FileRouteTypes {
     | '/satici/profil'
     | '/satici/urunler'
     | '/.mcp/invoke-tool/$tool'
+    | '/api/public/hooks/sync-market-prices'
     | '/api/public/product-images/$'
   id:
     | '__root__'
@@ -165,6 +188,7 @@ export interface FileRouteTypes {
     | '/giris'
     | '/harita'
     | '/kayit-ol'
+    | '/market-fiyatlari'
     | '/mcp'
     | '/sitemap.xml'
     | '/.mcp/list-tools'
@@ -172,6 +196,7 @@ export interface FileRouteTypes {
     | '/satici/profil'
     | '/satici/urunler'
     | '/.mcp/invoke-tool/$tool'
+    | '/api/public/hooks/sync-market-prices'
     | '/api/public/product-images/$'
   fileRoutesById: FileRoutesById
 }
@@ -180,6 +205,7 @@ export interface RootRouteChildren {
   GirisRoute: typeof GirisRoute
   HaritaRoute: typeof HaritaRoute
   KayitOlRoute: typeof KayitOlRoute
+  MarketFiyatlariRoute: typeof MarketFiyatlariRoute
   McpRoute: typeof McpRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   Char91DotmcpChar93ListToolsRoute: typeof Char91DotmcpChar93ListToolsRoute
@@ -187,6 +213,7 @@ export interface RootRouteChildren {
   SaticiProfilRoute: typeof SaticiProfilRoute
   SaticiUrunlerRoute: typeof SaticiUrunlerRoute
   Char91DotmcpChar93InvokeToolToolRoute: typeof Char91DotmcpChar93InvokeToolToolRoute
+  ApiPublicHooksSyncMarketPricesRoute: typeof ApiPublicHooksSyncMarketPricesRoute
   ApiPublicProductImagesSplatRoute: typeof ApiPublicProductImagesSplatRoute
 }
 
@@ -204,6 +231,13 @@ declare module '@tanstack/react-router' {
       path: '/mcp'
       fullPath: '/mcp'
       preLoaderRoute: typeof McpRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/market-fiyatlari': {
+      id: '/market-fiyatlari'
+      path: '/market-fiyatlari'
+      fullPath: '/market-fiyatlari'
+      preLoaderRoute: typeof MarketFiyatlariRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/kayit-ol': {
@@ -276,6 +310,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicProductImagesSplatRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/hooks/sync-market-prices': {
+      id: '/api/public/hooks/sync-market-prices'
+      path: '/api/public/hooks/sync-market-prices'
+      fullPath: '/api/public/hooks/sync-market-prices'
+      preLoaderRoute: typeof ApiPublicHooksSyncMarketPricesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -284,6 +325,7 @@ const rootRouteChildren: RootRouteChildren = {
   GirisRoute: GirisRoute,
   HaritaRoute: HaritaRoute,
   KayitOlRoute: KayitOlRoute,
+  MarketFiyatlariRoute: MarketFiyatlariRoute,
   McpRoute: McpRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   Char91DotmcpChar93ListToolsRoute: Char91DotmcpChar93ListToolsRoute,
@@ -292,6 +334,7 @@ const rootRouteChildren: RootRouteChildren = {
   SaticiProfilRoute: SaticiProfilRoute,
   SaticiUrunlerRoute: SaticiUrunlerRoute,
   Char91DotmcpChar93InvokeToolToolRoute: Char91DotmcpChar93InvokeToolToolRoute,
+  ApiPublicHooksSyncMarketPricesRoute: ApiPublicHooksSyncMarketPricesRoute,
   ApiPublicProductImagesSplatRoute: ApiPublicProductImagesSplatRoute,
 }
 export const routeTree = rootRouteImport
