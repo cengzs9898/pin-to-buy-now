@@ -25,7 +25,8 @@ function fmtTL(n: number) {
 }
 
 function MarketPricesPage() {
-  const { rows, lastUpdated } = Route.useLoaderData();
+  const data = Route.useLoaderData() as { rows: MarketPriceRow[]; lastUpdated: string | null };
+  const { rows, lastUpdated } = data;
   const [q, setQ] = useState("");
   const [market, setMarket] = useState<string>("");
   const [category, setCategory] = useState<string>("");
