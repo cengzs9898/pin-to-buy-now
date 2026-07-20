@@ -14,6 +14,57 @@ export type Database = {
   }
   public: {
     Tables: {
+      market_prices: {
+        Row: {
+          brand: string | null
+          depot_id: string | null
+          depot_name: string | null
+          id: string
+          image_url: string | null
+          index_time: string | null
+          main_category: string | null
+          market: string
+          menu_category: string | null
+          price: number
+          product_id: string
+          title: string
+          unit_price: string | null
+          updated_at: string
+        }
+        Insert: {
+          brand?: string | null
+          depot_id?: string | null
+          depot_name?: string | null
+          id: string
+          image_url?: string | null
+          index_time?: string | null
+          main_category?: string | null
+          market: string
+          menu_category?: string | null
+          price: number
+          product_id: string
+          title: string
+          unit_price?: string | null
+          updated_at?: string
+        }
+        Update: {
+          brand?: string | null
+          depot_id?: string | null
+          depot_name?: string | null
+          id?: string
+          image_url?: string | null
+          index_time?: string | null
+          main_category?: string | null
+          market?: string
+          menu_category?: string | null
+          price?: number
+          product_id?: string
+          title?: string
+          unit_price?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
