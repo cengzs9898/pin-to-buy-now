@@ -110,6 +110,12 @@ function Index() {
             >
               Market Fiyatları
             </a>
+            <a
+              href="/yakin-marketler"
+              className="hidden text-sm text-muted-foreground transition-colors hover:text-foreground sm:inline"
+            >
+              Yakın Marketler
+            </a>
             <Link
               to="/kayit-ol"
               className="inline-flex h-9 items-center rounded-xl bg-linear-to-r from-[#ff6b35] to-[#e84393] px-4 text-sm font-semibold text-white shadow-lg shadow-[#ff6b35]/20 transition-transform hover:scale-[1.03]"
