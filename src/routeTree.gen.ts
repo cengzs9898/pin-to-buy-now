@@ -9,6 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as YakinMarketlerRouteImport } from './routes/yakin-marketler'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as McpRouteImport } from './routes/mcp'
 import { Route as MarketFiyatlariRouteImport } from './routes/market-fiyatlari'
@@ -24,6 +25,11 @@ import { Route as Char91DotmcpChar93InvokeToolToolRouteImport } from './routes/[
 import { Route as ApiPublicProductImagesSplatRouteImport } from './routes/api/public/product-images.$'
 import { Route as ApiPublicHooksSyncMarketPricesRouteImport } from './routes/api/public/hooks/sync-market-prices'
 
+const YakinMarketlerRoute = YakinMarketlerRouteImport.update({
+  id: '/yakin-marketler',
+  path: '/yakin-marketler',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
   id: '/sitemap.xml',
   path: '/sitemap.xml',
@@ -108,6 +114,7 @@ export interface FileRoutesByFullPath {
   '/market-fiyatlari': typeof MarketFiyatlariRoute
   '/mcp': typeof McpRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/yakin-marketler': typeof YakinMarketlerRoute
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/satici/profil': typeof SaticiProfilRoute
@@ -124,6 +131,7 @@ export interface FileRoutesByTo {
   '/market-fiyatlari': typeof MarketFiyatlariRoute
   '/mcp': typeof McpRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/yakin-marketler': typeof YakinMarketlerRoute
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/satici/profil': typeof SaticiProfilRoute
@@ -141,6 +149,7 @@ export interface FileRoutesById {
   '/market-fiyatlari': typeof MarketFiyatlariRoute
   '/mcp': typeof McpRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/yakin-marketler': typeof YakinMarketlerRoute
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/satici/profil': typeof SaticiProfilRoute
@@ -159,6 +168,7 @@ export interface FileRouteTypes {
     | '/market-fiyatlari'
     | '/mcp'
     | '/sitemap.xml'
+    | '/yakin-marketler'
     | '/.mcp/list-tools'
     | '/.well-known/oauth-protected-resource'
     | '/satici/profil'
@@ -175,6 +185,7 @@ export interface FileRouteTypes {
     | '/market-fiyatlari'
     | '/mcp'
     | '/sitemap.xml'
+    | '/yakin-marketler'
     | '/.mcp/list-tools'
     | '/.well-known/oauth-protected-resource'
     | '/satici/profil'
@@ -191,6 +202,7 @@ export interface FileRouteTypes {
     | '/market-fiyatlari'
     | '/mcp'
     | '/sitemap.xml'
+    | '/yakin-marketler'
     | '/.mcp/list-tools'
     | '/.well-known/oauth-protected-resource'
     | '/satici/profil'
@@ -208,6 +220,7 @@ export interface RootRouteChildren {
   MarketFiyatlariRoute: typeof MarketFiyatlariRoute
   McpRoute: typeof McpRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
+  YakinMarketlerRoute: typeof YakinMarketlerRoute
   Char91DotmcpChar93ListToolsRoute: typeof Char91DotmcpChar93ListToolsRoute
   Char91DotwellKnownChar93OauthProtectedResourceRoute: typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   SaticiProfilRoute: typeof SaticiProfilRoute
@@ -219,6 +232,13 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/yakin-marketler': {
+      id: '/yakin-marketler'
+      path: '/yakin-marketler'
+      fullPath: '/yakin-marketler'
+      preLoaderRoute: typeof YakinMarketlerRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/sitemap.xml': {
       id: '/sitemap.xml'
       path: '/sitemap.xml'
@@ -328,6 +348,7 @@ const rootRouteChildren: RootRouteChildren = {
   MarketFiyatlariRoute: MarketFiyatlariRoute,
   McpRoute: McpRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
+  YakinMarketlerRoute: YakinMarketlerRoute,
   Char91DotmcpChar93ListToolsRoute: Char91DotmcpChar93ListToolsRoute,
   Char91DotwellKnownChar93OauthProtectedResourceRoute:
     Char91DotwellKnownChar93OauthProtectedResourceRoute,
